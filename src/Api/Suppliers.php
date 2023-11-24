@@ -2,32 +2,18 @@
 
 namespace Ashraam\PennylaneLaravel\Api;
 
-class Products extends BaseApiV1
+class Suppliers extends BaseApiV1
 {
     /**
-     * List all products
+     * List all suppliers
      *
      * @return array
      */
-    public function list()
+    public function list($page = 1, array $filters = [])
     {
-        $response = $this->client->request('get', self::API_NAMESPACE . "products");
-
-        return json_decode($response->getBody()->getContents(), true);
-    }
-
-
-    /**
-     * Create a new product
-     *
-     * @param array $data
-     * @return array
-     */
-    public function create(array $data)
-    {
-        $response = $this->client->request('post', self::API_NAMESPACE . "products", [
-            'json' => [
-                'product' => $data
+        $response = $this->client->request('get', self::API_NAMESPACE . "suppliers?page={$page}", [
+            'query' => [
+                'filter' => json_encode($filters)
             ]
         ]);
 
@@ -36,21 +22,39 @@ class Products extends BaseApiV1
 
 
     /**
-     * Retrieve a product by it's ID
+     * Create a new supplier
      *
-     * @param string $id
+     * @param array $data
      * @return array
      */
-    public function get(string $id)
+    public function create(array $data)
     {
-        $response = $this->client->request('get', self::API_NAMESPACE . "products/{$id}");
+        $response = $this->client->request('post', self::API_NAMESPACE . "suppliers", [
+            'json' => [
+                'supplier' => $data
+            ]
+        ]);
 
         return json_decode($response->getBody()->getContents(), true);
     }
 
 
     /**
-     * Update a product by it's ID
+     * Retrieve a supplier by it's ID
+     *
+     * @param string $id
+     * @return array
+     */
+    public function get(string $id)
+    {
+        $response = $this->client->request('get', self::API_NAMESPACE . "suppliers/{$id}");
+
+        return json_decode($response->getBody()->getContents(), true);
+    }
+
+
+    /**
+     * Update a supplier by it's ID
      *
      * @param string $id
      * @param array $data
@@ -58,9 +62,9 @@ class Products extends BaseApiV1
      */
     public function update(string $id, array $data)
     {
-        $response = $this->client->request('put', self::API_NAMESPACE . "products/{$id}", [
+        $response = $this->client->request('put', self::API_NAMESPACE . "suppliers/{$id}", [
             'json' => [
-                'product' => $data
+                'supplier' => $data
             ]
         ]);
 

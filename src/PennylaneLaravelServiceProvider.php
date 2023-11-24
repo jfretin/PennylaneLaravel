@@ -4,6 +4,7 @@ namespace Ashraam\PennylaneLaravel;
 
 use GuzzleHttp\Client;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Contracts\Foundation\Application;
 use Ashraam\PennylaneLaravel\PennylaneLaravel;
 
 class PennylaneLaravelServiceProvider extends ServiceProvider
@@ -62,7 +63,7 @@ class PennylaneLaravelServiceProvider extends ServiceProvider
         ]);
 
         // Register the main class to use with the facade
-        $this->app->singleton(PennylaneLaravel::class, function () use ($client) {
+        $this->app->singleton(PennylaneLaravel::class, function (Application $app) use ($client) {
             return new PennylaneLaravel($client);
         });
     }

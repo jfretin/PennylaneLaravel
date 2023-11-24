@@ -2,7 +2,7 @@
 
 namespace Ashraam\PennylaneLaravel\Api;
 
-class Enums extends BaseApi
+class Enums extends BaseApiV1
 {
     /**
      * Retrieve enums by it's ID
@@ -13,7 +13,7 @@ class Enums extends BaseApi
      */
     public function get(string $id, $locale = 'en')
     {
-        $response = $this->client->request('get', "enums/{$id}", [
+        $response = $this->client->request('get', self::API_NAMESPACE . "enums/{$id}", [
             'query' => [
                 'locale' => $locale
             ]

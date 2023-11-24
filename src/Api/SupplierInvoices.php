@@ -2,8 +2,9 @@
 
 namespace Ashraam\PennylaneLaravel\Api;
 
-class Invoices extends BaseApi
+class SupplierInvoices extends BaseApiV1
 {
+
     /**
      * List all invoices
      *
@@ -12,7 +13,7 @@ class Invoices extends BaseApi
      */
     public function list(array $filters = [])
     {
-        $response = $this->client->request('get', "customer_invoices", [
+        $response = $this->client->request('get', self::API_NAMESPACE . "supplier_invoices", [
             'query' => [
                 'filter' => json_encode($filters)
             ]
@@ -32,7 +33,7 @@ class Invoices extends BaseApi
      */
     public function create(array $data, bool $create_customer = false, bool $create_products = false)
     {
-        $response = $this->client->request('post', "customer_invoices", [
+        $response = $this->client->request('post', self::API_NAMESPACE . "supplier_invoices", [
             'json' => [
                 'create_customer' => $create_customer,
                 'create_products' => $create_products,
@@ -52,7 +53,7 @@ class Invoices extends BaseApi
      */
     public function get(string $id)
     {
-        $response = $this->client->request('get', "customer_invoices/{$id}");
+        $response = $this->client->request('get', self::API_NAMESPACE . "supplier_invoices/{$id}");
 
         return json_decode($response->getBody()->getContents(), true);
     }
@@ -68,7 +69,7 @@ class Invoices extends BaseApi
      */
     public function import(array $data, string $file_url, bool $create_customer)
     {
-        $response = $this->client->request('post', "customer_invoices/import", [
+        $response = $this->client->request('post', self::API_NAMESPACE . "supplier_invoices/import", [
             'json' => [
                 'create_customer' => $create_customer,
                 'file_url' => $file_url,
