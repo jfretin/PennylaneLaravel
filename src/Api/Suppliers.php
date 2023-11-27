@@ -9,13 +9,9 @@ class Suppliers extends BaseApiV1
      *
      * @return array
      */
-    public function list($page = 1, array $filters = [])
+    public function list($page = 1)
     {
-        $response = $this->client->request('get', self::API_NAMESPACE . "suppliers?page={$page}", [
-            'query' => [
-                'filter' => json_encode($filters)
-            ]
-        ]);
+        $response = $this->client->request('get', self::API_NAMESPACE . "suppliers?page=$page");
 
         return json_decode($response->getBody()->getContents(), true);
     }
