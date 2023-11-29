@@ -11,16 +11,22 @@ use Ashraam\PennylaneLaravel\Api\Customers;
 use Ashraam\PennylaneLaravel\Api\Suppliers;
 use Ashraam\PennylaneLaravel\Api\Estimates;
 use Ashraam\PennylaneLaravel\Api\PlanItems;
+use Ashraam\PennylaneLaravel\Api\LedgerEntries;
+use Ashraam\PennylaneLaravel\Api\LedgerAccounts;
+use Ashraam\PennylaneLaravel\Api\LedgerAttachments;
+use Ashraam\PennylaneLaravel\Api\Journals;
 
 class PennylaneLaravel
 {
     protected $client;
+    protected $client_v2;
 
     const API_NAMESPACE = 'v1/';
 
-    public function __construct(ClientInterface $client)
+    public function __construct(ClientInterface $client_v1, ClientInterface $client_v2)
     {
-        $this->client = $client;
+        $this->client = $client_v1;
+        $this->client_v2 = $client_v2;
     }
 
     public function me()
@@ -68,5 +74,25 @@ class PennylaneLaravel
     public function plan_items()
     {
         return new PlanItems($this->client);
+    }
+
+    public function ledger_entries()
+    {
+        return new LedgerEntries($this->client_v2);
+    }
+
+    public function ledger_accounts()
+    {
+        return new LedgerAccounts($this->client_v2);
+    }
+
+    public function ledger_attachments()
+    {
+        return new LedgerAttachments($this->client_v2);
+    }
+
+    public function journals()
+    {
+        return new Journals($this->client_v2);
     }
 }

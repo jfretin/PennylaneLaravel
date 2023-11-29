@@ -55,16 +55,22 @@ class PennylaneLaravelServiceProvider extends ServiceProvider
         // Automatically apply the package configuration
         $this->mergeConfigFrom(__DIR__.'/../config/config.php', 'pennylane-laravel');
 
-        $client = new Client([
+        $client_v1 = new Client([
             'base_uri' => config('pennylane-laravel.endpoint'),
             'headers' => [
-                "Authorization" => "Bearer ".config('pennylane-laravel.key')
+                "Authorization" => "Bearer ".config('pennylane-laravel.v1_key')
+            ]
+        ]);
+        $client_v2 = new Client([
+            'base_uri' => config('pennylane-laravel.endpoint'),
+            'headers' => [
+                "Authorization" => "Bearer ".config('pennylane-laravel.v2_key')
             ]
         ]);
 
         // Register the main class to use with the facade
-        $this->app->singleton(PennylaneLaravel::class, function (Application $app) use ($client) {
-            return new PennylaneLaravel($client);
+        $this->app->singleton(PennylaneLaravel::class, function (Application $app) use ($client_v1, $client_v2) {
+            return new PennylaneLaravel($client_v1, $client_v2);
         });
     }
 }

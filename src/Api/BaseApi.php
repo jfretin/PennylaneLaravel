@@ -12,4 +12,5 @@ abstract class BaseApi
     {
         $this->client = $client;
     }
+
 }
