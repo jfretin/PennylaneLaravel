@@ -13,8 +13,10 @@ class SupplierInvoices extends BaseApiV1
      */
     public function list($page = 1, $per_page = 20, array $filters = [])
     {
-        $response = $this->client->request('get', self::API_NAMESPACE . "supplier_invoices?page={$page}&per_page={$per_page}", [
+        $response = $this->client->request('get', self::API_NAMESPACE . "supplier_invoices", [
             'query' => [
+                'page' => $page,
+                'per_page' => $per_page,
                 'filter' => json_encode($filters)
             ]
         ]);
