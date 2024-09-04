@@ -15,6 +15,11 @@
             "name": "Romain Bertolucci",
             "email": "romain.bertolucci@gmail.com",
             "role": "Developer"
+        },
+        {
+            "name": "Jonathan Fretin",
+            "email": "jfretin@gmail.com",
+            "role": "Developer"
         }
     ],
     "require": {

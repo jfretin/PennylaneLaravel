@@ -4,6 +4,7 @@ namespace Ashraam\PennylaneLaravel;
 
 use GuzzleHttp\ClientInterface;
 use Ashraam\PennylaneLaravel\Api\Enums;
+use Ashraam\PennylaneLaravel\Api\Categories;
 use Ashraam\PennylaneLaravel\Api\CustomerInvoices;
 use Ashraam\PennylaneLaravel\Api\SupplierInvoices;
 use Ashraam\PennylaneLaravel\Api\Products;
@@ -70,6 +71,11 @@ class PennylaneLaravel
     public function enums()
     {
         return new Enums($this->client);
+    }
+
+    public function categories()
+    {
+        return new Categories($this->client);
     }
 
     public function plan_items()

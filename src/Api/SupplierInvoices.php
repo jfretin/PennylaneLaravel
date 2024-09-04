@@ -29,16 +29,16 @@ class SupplierInvoices extends BaseApiV1
      * Create a new invoice
      *
      * @param array $data
-     * @param boolean $create_customer
+     * @param boolean $create_supplier
      * @param boolean $create_products
      * @return array
      */
-    public function create(array $data, bool $create_customer = false, bool $create_products = false)
+    public function create(array $data, bool $create_supplier = false, bool $create_products = false)
     {
         $response = $this->client->request('post', self::API_NAMESPACE . "supplier_invoices", [
             'json' => [
-                'create_customer' => $create_customer,
-                'create_products' => $create_products,
+                'create_supplier' => $create_supplier,
+                /*'create_products' => $create_products,*/
                 'invoice' => $data
             ]
         ]);
@@ -66,17 +66,25 @@ class SupplierInvoices extends BaseApiV1
      *
      * @param array $data
      * @param string $file_url
-     * @param boolean $create_customer
+     * @param boolean $create_supplier
      * @return array
      */
-    public function import(array $data, string $file_url, bool $create_customer)
+    public function import(array $data, bool $create_supplier = false, string $file = '')
     {
+        $json = [
+            'create_supplier' => $create_supplier,
+            'invoice' => $data
+        ];
+        if ($file != '') {
+            if (0 === stripos($file, 'http')) {
+                $json['file_url'] = $file;
+            } else {
+                $json['file'] = $file;
+            }
+        }
+        
         $response = $this->client->request('post', self::API_NAMESPACE . "supplier_invoices/import", [
-            'json' => [
-                'create_customer' => $create_customer,
-                'file_url' => $file_url,
-                'invoice' => $data
-            ]
+            'json' => $json
         ]);
 
         return json_decode($response->getBody()->getContents(), true);

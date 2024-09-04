@@ -5,7 +5,7 @@ namespace Ashraam\PennylaneLaravel\Api;
 class Enums extends BaseApiV1
 {
     /**
-     * Retrieve enums by it's ID
+     * Retrieve enums by its ID
      *
      * @param string $id
      * @param string $locale

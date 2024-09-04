@@ -232,6 +232,18 @@ $values = PennylaneLaravel::enums()->get('unit', 'fr');
 ```
 ___
 
+### List Ledger Accounts
+```php
+$accounts = PennylaneLaravel::ledger_accounts()->list(1, 25);
+```
+___
+
+### List Ledger Accounts with filter on number start
+```php
+$accounts = PennylaneLaravel::ledger_accounts()->list(1, 25, [['field'=>'number', 'operator'=>'start_with', 'value'=>'607']]);
+```
+___
+
 ### Changelog
 
 Please see [CHANGELOG](CHANGELOG.md) for more information what has changed recently.
