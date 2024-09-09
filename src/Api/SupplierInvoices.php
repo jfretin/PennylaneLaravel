@@ -17,7 +17,7 @@ class SupplierInvoices extends BaseApiV1
             'query' => [
                 'page' => $page,
                 'per_page' => $per_page,
-                'filter' => urlencode(json_encode($filters))
+                'filter' => json_encode($filters)
             ]
         ]);
         $ret = json_decode($response->getBody()->getContents(), true);
