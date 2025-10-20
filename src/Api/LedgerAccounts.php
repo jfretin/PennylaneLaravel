@@ -2,8 +2,9 @@
 
 namespace Ashraam\PennylaneLaravel\Api;
 
-class LedgerAccounts extends BaseApiV2
+class LedgerAccounts extends BaseApi
 {
+    protected $defaultNamespace = self::API_NAMESPACE_V2;
     use Filterable;
 
     private $filter_fields = [
@@ -27,7 +28,7 @@ class LedgerAccounts extends BaseApiV2
         }
 
         $query_string = http_build_query($query);
-        $response = $this->client->request('get', self::API_NAMESPACE . "ledger_accounts?" . $query_string);
+        $response = $this->client->request('get', $this->getNamespace() . "ledger_accounts?" . $query_string);
 
         return json_decode($response->getBody()->getContents(), true);
     }
@@ -39,7 +40,7 @@ class LedgerAccounts extends BaseApiV2
      */
     public function get($id)
     {
-        $response = $this->client->request('get', self::API_NAMESPACE . "ledger_accounts/$id");
+        $response = $this->client->request('get', $this->getNamespace() . "ledger_accounts/$id");
 
         return json_decode($response->getBody()->getContents(), true);
     }

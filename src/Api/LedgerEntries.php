@@ -2,8 +2,9 @@
 
 namespace Ashraam\PennylaneLaravel\Api;
 
-class LedgerEntries extends BaseApiV2
+class LedgerEntries extends BaseApi
 {
+    protected $defaultNamespace = self::API_NAMESPACE_V2;
 
     use Filterable;
 
@@ -37,7 +38,7 @@ class LedgerEntries extends BaseApiV2
             $query['sort'] = $sort;
         }
         $query_string = http_build_query($query);
-        $response = $this->client->request('get', self::API_NAMESPACE . "ledger_entries?" . $query_string);
+        $response = $this->client->request('get', $this->getNamespace() . "ledger_entries?" . $query_string);
 
         return json_decode($response->getBody()->getContents(), true);
     }

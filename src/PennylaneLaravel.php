@@ -2,6 +2,7 @@
 
 namespace Ashraam\PennylaneLaravel;
 
+use Ashraam\PennylaneLaravel\Api\BaseApi;
 use GuzzleHttp\ClientInterface;
 use Ashraam\PennylaneLaravel\Api\Enums;
 use Ashraam\PennylaneLaravel\Api\Categories;
@@ -38,49 +39,99 @@ class PennylaneLaravel
         return json_decode($response->getBody()->getContents(), true);
     }
 
-    public function customers()
+    /**
+     * Customers resource accessor with per-call version selection.
+     * Usage: $api->customers('v2')->list(...)
+     *
+     * @param string|int|null $version 'v1'|'v2' or 1|2 (default v1)
+     */
+    public function customers($version = null)
     {
-        return new Customers($this->client);
+        [$client, $ns] = $this->resolveVersionAndClient($version);
+        return new Customers($client, $ns);
     }
 
-    public function suppliers()
+    /**
+     * Suppliers resource accessor with per-call version selection.
+     * Usage: $api->suppliers('v2')->list(...)
+     *
+     * @param string|int|null $version 'v1'|'v2' or 1|2 (default v1)
+     */
+    public function suppliers($version = null)
     {
-        return new Suppliers($this->client);
+        [$client, $ns] = $this->resolveVersionAndClient($version);
+        return new Suppliers($client, $ns);
     }
 
-    public function products()
+    /**
+     * Deprecated: use suppliers('v2').
+     */
+    public function suppliers2()
     {
-        return new Products($this->client);
+        return new Suppliers($this->client_v2, BaseApi::API_NAMESPACE_V2);
     }
 
-    public function customer_invoices()
+    /**
+     * Products resource accessor with per-call version selection.
+     */
+    public function products($version = null)
     {
-        return new CustomerInvoices($this->client);
+        [$client, $ns] = $this->resolveVersionAndClient($version);
+        return new Products($client, $ns);
     }
 
-    public function supplier_invoices()
+    /**
+     * Customer invoices accessor with per-call version selection.
+     */
+    public function customer_invoices($version = null)
     {
-        return new SupplierInvoices($this->client);
+        [$client, $ns] = $this->resolveVersionAndClient($version);
+        return new CustomerInvoices($client, $ns);
     }
 
-    public function estimates()
+    /**
+     * Supplier invoices accessor with per-call version selection.
+     */
+    public function supplier_invoices($version = null)
     {
-        return new Estimates($this->client);
+        [$client, $ns] = $this->resolveVersionAndClient($version);
+        return new SupplierInvoices($client, $ns);
     }
 
-    public function enums()
+    /**
+     * Estimates accessor with per-call version selection.
+     */
+    public function estimates($version = null)
     {
-        return new Enums($this->client);
+        [$client, $ns] = $this->resolveVersionAndClient($version);
+        return new Estimates($client, $ns);
     }
 
-    public function categories()
+    /**
+     * Enums accessor with per-call version selection.
+     */
+    public function enums($version = null)
     {
-        return new Categories($this->client);
+        [$client, $ns] = $this->resolveVersionAndClient($version);
+        return new Enums($client, $ns);
     }
 
-    public function plan_items()
+    /**
+     * Categories accessor with per-call version selection.
+     */
+    public function categories($version = null)
     {
-        return new PlanItems($this->client);
+        [$client, $ns] = $this->resolveVersionAndClient($version);
+        return new Categories($client, $ns);
+    }
+
+    /**
+     * Plan items accessor with per-call version selection.
+     */
+    public function plan_items($version = null)
+    {
+        [$client, $ns] = $this->resolveVersionAndClient($version);
+        return new PlanItems($client, $ns);
     }
 
     public function ledger_entries()
@@ -106,5 +157,21 @@ class PennylaneLaravel
     public function journals()
     {
         return new Journals($this->client_v2);
+    }
+
+    /**
+     * Normalize requested version and return [client, namespace].
+     *
+     * @param string|int|null $version
+     * @return array
+     */
+    private function resolveVersionAndClient($version): array
+    {
+        $v = is_null($version) ? 'v1' : strtolower((string)$version);
+        if ($v === '2' || $v === 'v2') {
+            return [$this->client_v2, BaseApi::API_NAMESPACE_V2];
+        }
+        // Default to v1
+        return [$this->client, BaseApi::API_NAMESPACE_V1];
     }
 }

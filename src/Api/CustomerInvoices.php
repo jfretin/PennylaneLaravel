@@ -2,7 +2,7 @@
 
 namespace Ashraam\PennylaneLaravel\Api;
 
-class CustomerInvoices extends BaseApiV1
+class CustomerInvoices extends BaseApi
 {
 
     /**
@@ -11,13 +11,34 @@ class CustomerInvoices extends BaseApiV1
      * @param array $filters
      * @return array
      */
-    public function list(array $filters = [])
+    public function list($page = 1, $per_page = 20, array $filters = [], ?string $sort = null, ?string $cursor = null)
     {
-        $response = $this->client->request('get', self::API_NAMESPACE . "customer_invoices", [
-            'query' => [
-                'filter' => json_encode($filters)
-            ]
-        ]);
+        $ns = $this->getNamespace();
+        $query = [];
+
+        if ($this->isV2()) {
+            if ($per_page !== null) {
+                $query['limit'] = $per_page; // V2 uses `limit`
+            }
+            if ($cursor !== null) {
+                $query['cursor'] = $cursor;
+            }
+            if (!empty($filters)) {
+                $query['filter'] = json_encode($filters);
+            }
+            if (!empty($sort)) {
+                $query['sort'] = $sort;
+            }
+        } else {
+            $query['page'] = $page;
+            $query['per_page'] = $per_page;
+            if (!empty($filters)) {
+                $query['filter'] = json_encode($filters);
+            }
+        }
+
+        $query_string = http_build_query($query);
+        $response = $this->client->request('get', $ns . 'customer_invoices' . ($query_string ? ('?' . $query_string) : ''));
 
         return json_decode($response->getBody()->getContents(), true);
     }
@@ -27,18 +48,13 @@ class CustomerInvoices extends BaseApiV1
      * Create a new invoice
      *
      * @param array $data
-     * @param boolean $create_customer
-     * @param boolean $create_products
      * @return array
      */
-    public function create(array $data, bool $create_customer = false, bool $create_products = false)
+    public function create(array $data)
     {
-        $response = $this->client->request('post', "customer_invoices", [
-            'json' => [
-                'create_customer' => $create_customer,
-                'create_products' => $create_products,
-                'invoice' => $data
-            ]
+        $payload = $this->buildPayload($data, 'invoice');
+        $response = $this->client->request('post', $this->getNamespace() . "customer_invoices", [
+            'json' => $payload
         ]);
 
         return json_decode($response->getBody()->getContents(), true);
@@ -53,7 +69,7 @@ class CustomerInvoices extends BaseApiV1
      */
     public function get(string $id)
     {
-        $response = $this->client->request('get', "customer_invoices/{$id}");
+        $response = $this->client->request('get', $this->getNamespace() . "customer_invoices/{$id}");
 
         return json_decode($response->getBody()->getContents(), true);
     }
@@ -69,12 +85,14 @@ class CustomerInvoices extends BaseApiV1
      */
     public function import(array $data, string $file_url, bool $create_customer)
     {
-        $response = $this->client->request('post', "customer_invoices/import", [
-            'json' => [
-                'create_customer' => $create_customer,
-                'file_url' => $file_url,
-                'invoice' => $data
-            ]
+        $base = [
+            'create_customer' => $create_customer,
+            'file_url' => $file_url,
+            'invoice' => $data,
+        ];
+        $payload = $this->buildPayload($base, 'invoice');
+        $response = $this->client->request('post', $this->getNamespace() . "customer_invoices/import", [
+            'json' => $payload
         ]);
 
         return json_decode($response->getBody()->getContents(), true);

@@ -2,7 +2,7 @@
 
 namespace Ashraam\PennylaneLaravel\Api;
 
-class Categories extends BaseApiV1
+class Categories extends BaseApi
 {
     use Filterable;
 
@@ -29,7 +29,7 @@ class Categories extends BaseApiV1
      */
     public function get(string $id)
     {
-        $response = $this->client->request('get', self::API_NAMESPACE . "categories/{$id}");
+        $response = $this->client->request('get', $this->getNamespace() . "categories/{$id}");
 
         return json_decode($response->getBody()->getContents(), true);
     }
@@ -56,7 +56,7 @@ class Categories extends BaseApiV1
             $query['sort'] = $sort;
         }
         $query_string = http_build_query($query);
-        $response = $this->client->request('get', self::API_NAMESPACE . "categories?" . $query_string);
+        $response = $this->client->request('get', $this->getNamespace() . "categories?" . $query_string);
 
         return json_decode($response->getBody()->getContents(), true);
     }

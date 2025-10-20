@@ -2,7 +2,7 @@
 
 namespace Ashraam\PennylaneLaravel\Api;
 
-class Products extends BaseApiV1
+class Products extends BaseApi
 {
     /**
      * List all products
@@ -11,7 +11,7 @@ class Products extends BaseApiV1
      */
     public function list()
     {
-        $response = $this->client->request('get', self::API_NAMESPACE . "products");
+        $response = $this->client->request('get', $this->getNamespace() . "products");
 
         return json_decode($response->getBody()->getContents(), true);
     }
@@ -25,10 +25,9 @@ class Products extends BaseApiV1
      */
     public function create(array $data)
     {
-        $response = $this->client->request('post', self::API_NAMESPACE . "products", [
-            'json' => [
-                'product' => $data
-            ]
+        $payload = $this->buildPayload($data, 'product');
+        $response = $this->client->request('post', $this->getNamespace() . "products", [
+            'json' => $payload,
         ]);
 
         return json_decode($response->getBody()->getContents(), true);
@@ -43,7 +42,7 @@ class Products extends BaseApiV1
      */
     public function get(string $id)
     {
-        $response = $this->client->request('get', self::API_NAMESPACE . "products/{$id}");
+        $response = $this->client->request('get', $this->getNamespace() . "products/{$id}");
 
         return json_decode($response->getBody()->getContents(), true);
     }
@@ -58,10 +57,9 @@ class Products extends BaseApiV1
      */
     public function update(string $id, array $data)
     {
-        $response = $this->client->request('put', self::API_NAMESPACE . "products/{$id}", [
-            'json' => [
-                'product' => $data
-            ]
+        $payload = $this->buildPayload($data, 'product');
+        $response = $this->client->request('put', $this->getNamespace() . "products/{$id}", [
+            'json' => $payload,
         ]);
 
         return json_decode($response->getBody()->getContents(), true);

@@ -2,33 +2,53 @@
 
 namespace Ashraam\PennylaneLaravel\Api;
 
-class Suppliers extends BaseApiV1
+class Suppliers extends BaseApi
 {
     /**
-     * List all suppliers
-     *
-     * @return array
+     * List suppliers
+     * - V1: page-based pagination (param: $page, $per_page)
+     * - V2: cursor-based (params: $cursor, $limit, $filter, $sort)
      */
-    public function list($page = 1)
+    public function list($page = 1, $per_page = 20, array $filters = [], ?string $sort = null, ?string $cursor = null)
     {
-        $response = $this->client->request('get', self::API_NAMESPACE . "suppliers?page=$page");
+        $ns = $this->getNamespace();
+        $query = [];
+
+        if (strpos($ns, 'v2/') === 0) {
+            $query['limit'] = $per_page;
+            if ($cursor !== null) {
+                $query['cursor'] = $cursor;
+            }
+            if (!empty($filters)) {
+                $query['filter'] = json_encode($filters);
+            }
+            if (!empty($sort)) {
+                $query['sort'] = $sort;
+            }
+        } else {
+            $query['page'] = $page;
+        }
+
+        $query_string = http_build_query($query);
+        $url = $ns . 'suppliers' . ($query_string ? ('?' . $query_string) : '');
+        $response = $this->client->request('get', $url);
 
         return json_decode($response->getBody()->getContents(), true);
     }
 
 
     /**
-     * Create a new supplier
-     *
-     * @param array $data
-     * @return array
+     * Create a supplier
+     * - V1: payload enveloped as { supplier: {...} }
+     * - V2: top-level payload {...}
      */
     public function create(array $data)
     {
-        $response = $this->client->request('post', self::API_NAMESPACE . "suppliers", [
-            'json' => [
-                'supplier' => $data
-            ]
+        $ns = $this->getNamespace();
+        $payload = $this->buildPayload($data, 'supplier');
+
+        $response = $this->client->request('post', $ns . 'suppliers', [
+            'json' => $payload,
         ]);
 
         return json_decode($response->getBody()->getContents(), true);
@@ -36,32 +56,31 @@ class Suppliers extends BaseApiV1
 
 
     /**
-     * Retrieve a supplier by it's ID
-     *
-     * @param string $id
-     * @return array
+     * Retrieve a supplier by ID
+     * - V1: $id is source_id (string)
+     * - V2: $id is integer
      */
-    public function get(string $id)
+    public function get($id)
     {
-        $response = $this->client->request('get', self::API_NAMESPACE . "suppliers/{$id}");
+        $ns = $this->getNamespace();
+        $response = $this->client->request('get', $ns . "suppliers/{$id}");
 
         return json_decode($response->getBody()->getContents(), true);
     }
 
 
     /**
-     * Update a supplier by it's ID
-     *
-     * @param string $id
-     * @param array $data
-     * @return array
+     * Update a supplier
+     * - V1: payload enveloped as { supplier: {...} }
+     * - V2: top-level payload {...}
      */
-    public function update(string $id, array $data)
+    public function update($id, array $data)
     {
-        $response = $this->client->request('put', self::API_NAMESPACE . "suppliers/{$id}", [
-            'json' => [
-                'supplier' => $data
-            ]
+        $ns = $this->getNamespace();
+        $payload = $this->buildPayload($data, 'supplier');
+
+        $response = $this->client->request('put', $ns . "suppliers/{$id}", [
+            'json' => $payload,
         ]);
 
         return json_decode($response->getBody()->getContents(), true);

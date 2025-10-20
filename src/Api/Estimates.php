@@ -2,7 +2,7 @@
 
 namespace Ashraam\PennylaneLaravel\Api;
 
-class Estimates extends BaseApiV1
+class Estimates extends BaseApi
 {
     /**
      * List all estimates
@@ -12,7 +12,7 @@ class Estimates extends BaseApiV1
      */
     public function list(array $filters = [])
     {
-        $response = $this->client->request('get', self::API_NAMESPACE . "customer_estimates", [
+        $response = $this->client->request('get', $this->getNamespace() . "customer_estimates", [
             'query' => [
                 'filter' => json_encode($filters)
             ]
@@ -31,12 +31,14 @@ class Estimates extends BaseApiV1
      */
     public function create(array $data, bool $create_customer = false, bool $create_products = false)
     {
-        $response = $this->client->request('post', self::API_NAMESPACE . "customer_estimates", [
-            'json' => [
-                'create_customer' => $create_customer,
-                'create_products' => $create_products,
-                'estimate' => $data
-            ]
+        $base = [
+            'create_customer' => $create_customer,
+            'create_products' => $create_products,
+            'estimate' => $data,
+        ];
+        $payload = $this->buildPayload($base, 'estimate');
+        $response = $this->client->request('post', $this->getNamespace() . "customer_estimates", [
+            'json' => $payload,
         ]);
 
         return json_decode($response->getBody()->getContents(), true);
@@ -51,7 +53,7 @@ class Estimates extends BaseApiV1
      */
     public function get(string $id)
     {
-        $response = $this->client->request('get', self::API_NAMESPACE . "customer_estimates/{$id}");
+        $response = $this->client->request('get', $this->getNamespace() . "customer_estimates/{$id}");
 
         return json_decode($response->getBody()->getContents(), true);
     }

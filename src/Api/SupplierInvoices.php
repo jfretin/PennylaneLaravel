@@ -2,7 +2,7 @@
 
 namespace Ashraam\PennylaneLaravel\Api;
 
-class SupplierInvoices extends BaseApiV1
+class SupplierInvoices extends BaseApi
 {
 
     /**
@@ -11,17 +11,36 @@ class SupplierInvoices extends BaseApiV1
      * @param array $filters
      * @return array
      */
-    public function list($page = 1, $per_page = 20, array $filters = [])
+    public function list($page = 1, $per_page = 20, array $filters = [], ?string $sort = null, ?string $cursor = null)
     {
-        $response = $this->client->request('get', self::API_NAMESPACE . "supplier_invoices", [
-            'query' => [
-                'page' => $page,
-                'per_page' => $per_page,
-                'filter' => json_encode($filters)
-            ]
-        ]);
-        $ret = json_decode($response->getBody()->getContents(), true);
-        return $ret;
+        $ns = $this->getNamespace();
+        $query = [];
+
+        if ($this->isV2()) {
+            if ($per_page !== null) {
+                $query['limit'] = $per_page; // V2 often uses `limit`
+            }
+            if ($cursor !== null) {
+                $query['cursor'] = $cursor;
+            }
+            if (!empty($filters)) {
+                $query['filter'] = json_encode($filters);
+            }
+            if (!empty($sort)) {
+                $query['sort'] = $sort;
+            }
+        } else {
+            $query['page'] = $page;
+            $query['per_page'] = $per_page;
+            if (!empty($filters)) {
+                $query['filter'] = json_encode($filters);
+            }
+        }
+
+        $query_string = http_build_query($query);
+        $response = $this->client->request('get', $ns . 'supplier_invoices' . ($query_string ? ('?' . $query_string) : ''));
+
+        return json_decode($response->getBody()->getContents(), true);
     }
 
 
@@ -35,12 +54,15 @@ class SupplierInvoices extends BaseApiV1
      */
     public function create(array $data, bool $create_supplier = false, bool $create_products = false)
     {
-        $response = $this->client->request('post', self::API_NAMESPACE . "supplier_invoices", [
-            'json' => [
-                'create_supplier' => $create_supplier,
-                /*'create_products' => $create_products,*/
-                'invoice' => $data
-            ]
+        $base = [
+            'create_supplier' => $create_supplier,
+            /*'create_products' => $create_products,*/
+            'invoice' => $data,
+        ];
+        $payload = $this->buildPayload($base, 'invoice');
+
+        $response = $this->client->request('post', $this->getNamespace() . "supplier_invoices", [
+            'json' => $payload
         ]);
 
         return json_decode($response->getBody()->getContents(), true);
@@ -55,7 +77,7 @@ class SupplierInvoices extends BaseApiV1
      */
     public function get(string $id)
     {
-        $response = $this->client->request('get', self::API_NAMESPACE . "supplier_invoices/{$id}");
+        $response = $this->client->request('get', $this->getNamespace() . "supplier_invoices/{$id}");
 
         return json_decode($response->getBody()->getContents(), true);
     }
@@ -83,8 +105,10 @@ class SupplierInvoices extends BaseApiV1
             }
         }
         
-        $response = $this->client->request('post', self::API_NAMESPACE . "supplier_invoices/import", [
-            'json' => $json
+        $payload = $this->buildPayload($json, 'invoice');
+
+        $response = $this->client->request('post', $this->getNamespace() . "supplier_invoices/import", [
+            'json' => $payload
         ]);
 
         return json_decode($response->getBody()->getContents(), true);
