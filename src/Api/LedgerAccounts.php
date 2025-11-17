@@ -44,4 +44,16 @@ class LedgerAccounts extends BaseApi
 
         return json_decode($response->getBody()->getContents(), true);
     }
+
+    /**
+     * Create a ledger account.
+     */
+    public function create(array $payload)
+    {
+        $response = $this->client->request('post', $this->getNamespace() . 'ledger_accounts', [
+            'json' => $payload,
+        ]);
+
+        return json_decode($response->getBody()->getContents(), true);
+    }
 }
