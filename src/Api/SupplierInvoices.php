@@ -113,4 +113,45 @@ class SupplierInvoices extends BaseApi
 
         return json_decode($response->getBody()->getContents(), true);
     }
+
+
+    /**
+     * Retrieve a supplier invoice sub-resource (invoice_lines, categories, payments, matched_transactions).
+     *
+     * @param int|string $invoiceId
+     * @param string $resource
+     * @param array $query
+     * @return array
+     */
+    public function subResource(int|string $invoiceId, string $resource, array $query = []): array
+    {
+        if (!$this->isV2()) {
+            throw new \RuntimeException('Supplier invoice sub-resources are only available with the V2 API.');
+        }
+
+        $allowed = [
+            'invoice_lines',
+            'categories',
+            'payments',
+            'matched_transactions',
+        ];
+
+        if (!in_array($resource, $allowed, true)) {
+            throw new \InvalidArgumentException(sprintf('Unsupported supplier invoice sub-resource "%s".', $resource));
+        }
+
+        $queryString = http_build_query($query);
+        $endpoint = sprintf(
+            '%ssupplier_invoices/%s/%s%s',
+            $this->getNamespace(),
+            $invoiceId,
+            $resource,
+            $queryString ? ('?' . $queryString) : ''
+        );
+
+        $response = $this->client->request('get', $endpoint);
+
+        return json_decode($response->getBody()->getContents(), true);
+    }
+
 }
