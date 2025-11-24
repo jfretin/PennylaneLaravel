@@ -16,7 +16,7 @@ use Ashraam\PennylaneLaravel\Api\PlanItems;
 use Ashraam\PennylaneLaravel\Api\LedgerEntries;
 use Ashraam\PennylaneLaravel\Api\LedgerEntryLines;
 use Ashraam\PennylaneLaravel\Api\LedgerAccounts;
-use Ashraam\PennylaneLaravel\Api\LedgerAttachments;
+use Ashraam\PennylaneLaravel\Api\Attachment;
 use Ashraam\PennylaneLaravel\Api\Journals;
 
 class PennylaneLaravel
@@ -149,9 +149,9 @@ class PennylaneLaravel
         return new LedgerAccounts($this->client_v2);
     }
 
-    public function ledger_attachments()
+    public function attachments()
     {
-        return new LedgerAttachments($this->client_v2);
+        return new Attachment($this->client_v2);
     }
 
     public function journals()

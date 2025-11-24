@@ -7,7 +7,7 @@ class LedgerEntryLines extends BaseApi
     protected $defaultNamespace = self::API_NAMESPACE_V2;
     /**
      * List all entries
-     *
+     * 
      * @return array
      */
     public function list($ledger_entry_id, $page = 1, $per_page = 20)

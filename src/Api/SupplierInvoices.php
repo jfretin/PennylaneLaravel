@@ -154,4 +154,26 @@ class SupplierInvoices extends BaseApi
         return json_decode($response->getBody()->getContents(), true);
     }
 
+    /**
+     * Replace categories of a supplier invoice (V2 only).
+     *
+     * @param int|string $invoiceId
+     * @param array $categories
+     * @return array
+     */
+    public function setCategories(int|string $invoiceId, array $categories): array
+    {
+        if (!$this->isV2()) {
+            throw new \RuntimeException('Supplier invoice categories update is only available with the V2 API.');
+        }
+
+        $endpoint = sprintf('%ssupplier_invoices/%s/categories', $this->getNamespace(), $invoiceId);
+
+        $response = $this->client->request('put', $endpoint, [
+            'json' => $categories,
+        ]);
+
+        return json_decode($response->getBody()->getContents(), true);
+    }
+
 }

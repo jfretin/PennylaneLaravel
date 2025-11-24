@@ -11,11 +11,14 @@ class LedgerEntries extends BaseApi
     private $sort_fields = [
         'updated_at',
         'created_at',
+        'date',
     ];
 
     private $filter_fields = [
         'updated_at',
         'created_at',
+        'journal_id',
+        'date',
     ];
 
     /**
