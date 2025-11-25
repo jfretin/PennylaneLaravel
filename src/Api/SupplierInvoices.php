@@ -94,17 +94,8 @@ class SupplierInvoices extends BaseApi
     public function import(array $data, bool $create_supplier = false, string $file = '')
     {
         $json = [
-            'create_supplier' => $create_supplier,
             'invoice' => $data
         ];
-        if ($file != '') {
-            if (0 === stripos($file, 'http')) {
-                $json['file_url'] = $file;
-            } else {
-                $json['file'] = $file;
-            }
-        }
-        
         $payload = $this->buildPayload($json, 'invoice');
 
         $response = $this->client->request('post', $this->getNamespace() . "supplier_invoices/import", [
