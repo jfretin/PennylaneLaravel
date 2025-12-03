@@ -45,4 +45,27 @@ class LedgerEntries extends BaseApi
 
         return json_decode($response->getBody()->getContents(), true);
     }
+
+    /**
+     * Create a ledger entry using the V2 API.
+     *
+     * @param array $ledger_entry
+     * @return array
+     * @throws \RuntimeException When the API namespace is not V2
+     * @author Jonathan F. <jonathan.f@mistersmoke.com>
+     */
+    public function create(array $ledger_entry): array
+    {
+        if (!$this->isV2()) {
+            throw new \RuntimeException('Ledger entry creation is only available with the V2 API.');
+        }
+
+        $payload = $this->buildPayload(['ledger_entry' => $ledger_entry], 'ledger_entry');
+
+        $response = $this->client->request('post', $this->getNamespace() . 'ledger_entries', [
+            'json' => $payload,
+        ]);
+
+        return json_decode($response->getBody()->getContents(), true);
+    }
 }
