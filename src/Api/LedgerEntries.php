@@ -47,6 +47,30 @@ class LedgerEntries extends BaseApi
     }
 
     /**
+     * Retrieve a single ledger entry via the V2 API.
+     *
+     * @param int|string $ledgerEntryId
+     * @return array
+     * @throws \RuntimeException When the API namespace is not V2
+     * @author Jonathan F. <jonathan.f@mistersmoke.com>
+     */
+    public function get(int|string $ledgerEntryId): array
+    {
+        if ($ledgerEntryId === '' || $ledgerEntryId === null) {
+            throw new \InvalidArgumentException('Ledger entry id is required.');
+        }
+
+        if (!$this->isV2()) {
+            throw new \RuntimeException('Ledger entry retrieval is only available with the V2 API.');
+        }
+
+        $endpoint = sprintf('%sledger_entries/%s', $this->getNamespace(), $ledgerEntryId);
+        $response = $this->client->request('get', $endpoint);
+
+        return json_decode($response->getBody()->getContents(), true);
+    }
+
+    /**
      * Create a ledger entry using the V2 API.
      *
      * @param array $ledger_entry
