@@ -84,4 +84,29 @@ class LedgerEntryLines extends BaseApi
 
         return json_decode($response->getBody()->getContents(), true);
     }
+
+    /**
+     * Retrieve a ledger entry line by its identifier (V2 only).
+     *
+     * @param int|string $ledger_entry_line_id
+     * @return array
+     * @throws \RuntimeException When the API namespace is not V2.
+     * @throws \InvalidArgumentException When $ledger_entry_line_id is empty.
+     * @author Jonathan F. <jonathan.f@mistersmoke.com>
+     */
+    public function get(int|string $ledger_entry_line_id): array
+    {
+        if (!$this->isV2()) {
+            throw new \RuntimeException('Ledger entry line retrieval is only available with the V2 API.');
+        }
+
+        if ($ledger_entry_line_id === '' || $ledger_entry_line_id === null) {
+            throw new \InvalidArgumentException('A ledger entry line id must be provided.');
+        }
+
+        $endpoint = sprintf('%sledger_entry_lines/%s', $this->getNamespace(), $ledger_entry_line_id);
+        $response = $this->client->request('get', $endpoint);
+
+        return json_decode($response->getBody()->getContents(), true);
+    }
 }
