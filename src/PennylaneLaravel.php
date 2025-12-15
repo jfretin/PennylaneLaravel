@@ -18,6 +18,7 @@ use Ashraam\PennylaneLaravel\Api\LedgerEntryLines;
 use Ashraam\PennylaneLaravel\Api\LedgerAccounts;
 use Ashraam\PennylaneLaravel\Api\Attachment;
 use Ashraam\PennylaneLaravel\Api\Journals;
+use Ashraam\PennylaneLaravel\Api\Changelogs;
 
 class PennylaneLaravel
 {
@@ -157,6 +158,11 @@ class PennylaneLaravel
     public function journals()
     {
         return new Journals($this->client_v2);
+    }
+
+    public function changelogs()
+    {
+        return new Changelogs($this->client_v2, BaseApi::API_NAMESPACE_V2);
     }
 
     /**
