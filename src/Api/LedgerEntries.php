@@ -92,4 +92,57 @@ class LedgerEntries extends BaseApi
 
         return json_decode($response->getBody()->getContents(), true);
     }
+
+    /**
+     * Update a ledger entry using the V2 API.
+     *
+     * @param int|string $ledgerEntryId
+     * @param array $ledger_entry
+     * @return array
+     * @throws \RuntimeException When the API namespace is not V2
+     * @author Jonathan F. <jonathan.f@mistersmoke.com>
+     */
+    public function update(int|string $ledgerEntryId, array $ledger_entry): array
+    {
+        if ($ledgerEntryId === '' || $ledgerEntryId === null) {
+            throw new \InvalidArgumentException('Ledger entry id is required.');
+        }
+
+        if (!$this->isV2()) {
+            throw new \RuntimeException('Ledger entry update is only available with the V2 API.');
+        }
+
+        $payload = $this->buildPayload(['ledger_entry' => $ledger_entry], 'ledger_entry');
+        $endpoint = sprintf('%sledger_entries/%s', $this->getNamespace(), $ledgerEntryId);
+
+        $response = $this->client->request('put', $endpoint, [
+            'json' => $payload,
+        ]);
+
+        return json_decode($response->getBody()->getContents(), true);
+    }
+
+    /**
+     * Delete a ledger entry using the V2 API.
+     *
+     * @param int|string $ledgerEntryId
+     * @return array
+     * @throws \RuntimeException When the API namespace is not V2
+     * @author Jonathan F. <jonathan.f@mistersmoke.com>
+     */
+    public function delete(int|string $ledgerEntryId): array
+    {
+        if ($ledgerEntryId === '' || $ledgerEntryId === null) {
+            throw new \InvalidArgumentException('Ledger entry id is required.');
+        }
+
+        if (!$this->isV2()) {
+            throw new \RuntimeException('Ledger entry deletion is only available with the V2 API.');
+        }
+
+        $endpoint = sprintf('%sledger_entries/%s', $this->getNamespace(), $ledgerEntryId);
+        $response = $this->client->request('delete', $endpoint);
+
+        return json_decode($response->getBody()->getContents(), true);
+    }
 }

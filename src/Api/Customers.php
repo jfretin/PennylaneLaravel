@@ -13,21 +13,22 @@ class Customers extends BaseApi
 
     /**
      * List customers
-     * - V1: page-based pagination (param: $page)
+     * - V1: page-based pagination (params: $page, $filters)
      * - V2: cursor-based (params: $cursor, $limit, $filters, $sort)
      *
-     * @param int $page Only for V1
-     * @param int $per_page For both V1/V2 (V2 default 20 on API side)
-     * @param array $filters Array of filters. V1 uses Filterable string, V2 json-encoded array
-     * @param string|null $sort Only for V2
-     * @param string|null $cursor Only for V2
+     * @param int $page Ignored (kept for backward compatibility)
+     * @param int $per_page V2 default 20 on API side
+     * @param array $filters Array of filters (json-encoded)
+     * @param string|null $sort
+     * @param string|null $cursor
      */
     public function list($page = 1, $per_page = 25, $filters = [], ?string $sort = null, ?string $cursor = null)
     {
         $ns = $this->getNamespace();
+        $query = [];
 
-        if (strpos($ns, 'v2/') === 0) {
-            $query = ['limit' => $per_page];
+        if ($this->isV2()) {
+            $query['limit'] = $per_page;
             if ($cursor !== null) {
                 $query['cursor'] = $cursor;
             }
@@ -38,13 +39,9 @@ class Customers extends BaseApi
                 $query['sort'] = $sort;
             }
         } else {
-            $filter = $this->get_filters($filters);
-            $query = [
-                'page'     => $page,
-                'per_page' => $per_page,
-            ];
-            if ($filter !== '') {
-                $query['filter'] = $filter;
+            $query['page'] = $page;
+            if (!empty($filters)) {
+                $query['filter'] = is_string($filters) ? $filters : json_encode($filters);
             }
         }
 
@@ -57,15 +54,17 @@ class Customers extends BaseApi
 
     /**
      * Create a new customer
-     * - V1: payload enveloped as { customer: {...} }
-     * - V2: top-level payload {...}
+     * - V2 only: POST /company_customers or /individual_customers
      */
     public function create(array $data)
     {
         $ns = $this->getNamespace();
         $payload = $this->buildPayload($data, 'customer');
+        $customer_type = $this->resolveCustomerType($payload);
+        $payload = $this->stripInternalKeys($payload);
+        $endpoint = $customer_type === 'individual' ? 'individual_customers' : 'company_customers';
 
-        $response = $this->client->request('post', $ns . 'customers', [
+        $response = $this->client->request('post', $ns . $endpoint, [
             'json' => $payload,
         ]);
 
@@ -75,8 +74,7 @@ class Customers extends BaseApi
 
     /**
      * Retrieve a customer by ID
-     * - V1: $id is source_id (string)
-     * - V2: $id is integer
+     * - V2 only: $id is integer
      */
     public function get($id)
     {
@@ -89,18 +87,54 @@ class Customers extends BaseApi
 
     /**
      * Update a customer by ID
-     * - V1: payload enveloped as { customer: {...} }
-     * - V2: top-level payload {...}
+     * - V2 only: PUT /company_customers/{id} or /individual_customers/{id}
      */
     public function update($id, array $data)
     {
         $ns = $this->getNamespace();
         $payload = $this->buildPayload($data, 'customer');
+        $customer_type = $this->resolveCustomerType($payload);
+        $payload = $this->stripInternalKeys($payload);
+        $endpoint = $customer_type === 'individual' ? 'individual_customers' : 'company_customers';
 
-        $response = $this->client->request('put', $ns . "customers/{$id}", [
+        $response = $this->client->request('put', $ns . "{$endpoint}/{$id}", [
             'json' => $payload,
         ]);
 
         return json_decode($response->getBody()->getContents(), true);
+    }
+
+    /**
+     * Resolve customer type for V2 endpoints.
+     *
+     * @param array $data
+     * @return string
+     * @author Jonathan F. <jonathan.f@mistersmoke.com>
+     */
+    private function resolveCustomerType(array $data): string
+    {
+        $type = $data['customer_type'] ?? null;
+        if (is_string($type) && $type !== '') {
+            return strtolower($type) === 'individual' ? 'individual' : 'company';
+        }
+
+        if (array_key_exists('first_name', $data) || array_key_exists('last_name', $data)) {
+            return 'individual';
+        }
+
+        return 'company';
+    }
+
+    /**
+     * Remove internal keys not accepted by V2 payloads.
+     *
+     * @param array $data
+     * @return array
+     * @author Jonathan F. <jonathan.f@mistersmoke.com>
+     */
+    private function stripInternalKeys(array $data): array
+    {
+        unset($data['customer_type']);
+        return $data;
     }
 }
