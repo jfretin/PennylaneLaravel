@@ -7,6 +7,7 @@ use GuzzleHttp\ClientInterface;
 use Ashraam\PennylaneLaravel\Api\Enums;
 use Ashraam\PennylaneLaravel\Api\Categories;
 use Ashraam\PennylaneLaravel\Api\CustomerInvoices;
+use Ashraam\PennylaneLaravel\Api\CustomerInvoiceTemplates;
 use Ashraam\PennylaneLaravel\Api\SupplierInvoices;
 use Ashraam\PennylaneLaravel\Api\Products;
 use Ashraam\PennylaneLaravel\Api\Customers;
@@ -97,6 +98,16 @@ class PennylaneLaravel
     {
         [$client, $ns] = $this->resolveVersionAndClient($version);
         return new SupplierInvoices($client, $ns);
+    }
+
+    /**
+     * Customer invoice templates accessor (V2 only).
+     *
+     * @author Jonathan F. <jonathan.f@mistersmoke.com>
+     */
+    public function customer_invoice_templates()
+    {
+        return new CustomerInvoiceTemplates($this->client_v2);
     }
 
     /**

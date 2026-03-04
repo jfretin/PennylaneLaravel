@@ -97,4 +97,36 @@ class CustomerInvoices extends BaseApi
 
         return json_decode($response->getBody()->getContents(), true);
     }
+
+    /**
+     * Delete a draft customer invoice or draft credit note using the V2 API.
+     *
+     * @param int|string $customerInvoiceId
+     * @return bool
+     * @throws \RuntimeException When the API namespace is not V2
+     * @author Jonathan F. <jonathan.f@mistersmoke.com>
+     */
+    public function delete(int|string $customerInvoiceId): bool
+    {
+        if ($customerInvoiceId === '' || $customerInvoiceId === null) {
+            throw new \InvalidArgumentException('Customer invoice id is required.');
+        }
+
+        if (!$this->isV2()) {
+            throw new \RuntimeException('Customer invoice deletion is only available with the V2 API.');
+        }
+
+        $endpoint = sprintf('%scustomer_invoices/%s', $this->getNamespace(), $customerInvoiceId);
+        $response = $this->client->request('delete', $endpoint);
+        $statusCode = $response->getStatusCode();
+
+        if ($statusCode !== 204) {
+            throw new \RuntimeException(sprintf(
+                'Unexpected response status when deleting customer invoice draft: %s.',
+                $statusCode
+            ));
+        }
+
+        return true;
+    }
 }
