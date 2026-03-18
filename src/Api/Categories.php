@@ -60,27 +60,23 @@ class Categories extends BaseApi
         $sort = $this->sortQuery($sort, $this->isV2() ? $this->sort_fields_v2 : $this->sort_fields_v1);
         $query = [
         ];
+        $useCursorPagination = $this->isV2() && func_num_args() >= 5;
 
-        if ($this->isV2()) {
+        if ($useCursorPagination) {
             $query['limit'] = $per_page;
             if ($cursor !== null) {
                 $query['cursor'] = $cursor;
             }
-            if ($filter != '') {
-                $query['filter'] = $filter;
-            }
-            if ($sort != '') {
-                $query['sort'] = $sort;
-            }
         } else {
             $query['page'] = $page;
             $query['per_page'] = $per_page;
-            if ($filter != '') {
-                $query['filter'] = $filter;
-            }
-            if ($sort != '') {
-                $query['sort'] = $sort;
-            }
+        }
+
+        if ($filter != '') {
+            $query['filter'] = $filter;
+        }
+        if ($sort != '') {
+            $query['sort'] = $sort;
         }
 
         $query_string = http_build_query($query);
