@@ -28,9 +28,7 @@ class LedgerAccounts extends BaseApi
         }
 
         $query_string = http_build_query($query);
-        $response = $this->client->request('get', $this->getNamespace() . "ledger_accounts?" . $query_string);
-
-        return json_decode($response->getBody()->getContents(), true);
+        return $this->requestJson('get', $this->getNamespace() . "ledger_accounts?" . $query_string);
     }
 
     /**
@@ -40,9 +38,7 @@ class LedgerAccounts extends BaseApi
      */
     public function get($id)
     {
-        $response = $this->client->request('get', $this->getNamespace() . "ledger_accounts/$id");
-
-        return json_decode($response->getBody()->getContents(), true);
+        return $this->requestJson('get', $this->getNamespace() . "ledger_accounts/$id");
     }
 
     /**
@@ -50,10 +46,8 @@ class LedgerAccounts extends BaseApi
      */
     public function create(array $payload)
     {
-        $response = $this->client->request('post', $this->getNamespace() . 'ledger_accounts', [
+        return $this->requestJson('post', $this->getNamespace() . 'ledger_accounts', [
             'json' => $payload,
         ]);
-
-        return json_decode($response->getBody()->getContents(), true);
     }
 }

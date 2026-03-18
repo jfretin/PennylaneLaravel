@@ -38,9 +38,7 @@ class SupplierInvoices extends BaseApi
         }
 
         $query_string = http_build_query($query);
-        $response = $this->client->request('get', $ns . 'supplier_invoices' . ($query_string ? ('?' . $query_string) : ''));
-
-        return json_decode($response->getBody()->getContents(), true);
+        return $this->requestJson('get', $ns . 'supplier_invoices' . ($query_string ? ('?' . $query_string) : ''));
     }
 
 
@@ -61,11 +59,9 @@ class SupplierInvoices extends BaseApi
         ];
         $payload = $this->buildPayload($base, 'invoice');
 
-        $response = $this->client->request('post', $this->getNamespace() . "supplier_invoices", [
+        return $this->requestJson('post', $this->getNamespace() . "supplier_invoices", [
             'json' => $payload
         ]);
-
-        return json_decode($response->getBody()->getContents(), true);
     }
 
 
@@ -77,9 +73,7 @@ class SupplierInvoices extends BaseApi
      */
     public function get(string $id)
     {
-        $response = $this->client->request('get', $this->getNamespace() . "supplier_invoices/{$id}");
-
-        return json_decode($response->getBody()->getContents(), true);
+        return $this->requestJson('get', $this->getNamespace() . "supplier_invoices/{$id}");
     }
 
 
@@ -98,11 +92,9 @@ class SupplierInvoices extends BaseApi
         ];
         $payload = $this->buildPayload($json, 'invoice');
 
-        $response = $this->client->request('post', $this->getNamespace() . "supplier_invoices/import", [
+        return $this->requestJson('post', $this->getNamespace() . "supplier_invoices/import", [
             'json' => $payload
         ]);
-
-        return json_decode($response->getBody()->getContents(), true);
     }
 
 
@@ -140,9 +132,7 @@ class SupplierInvoices extends BaseApi
             $queryString ? ('?' . $queryString) : ''
         );
 
-        $response = $this->client->request('get', $endpoint);
-
-        return json_decode($response->getBody()->getContents(), true);
+        return $this->requestJson('get', $endpoint);
     }
 
     /**
@@ -160,11 +150,9 @@ class SupplierInvoices extends BaseApi
 
         $endpoint = sprintf('%ssupplier_invoices/%s/categories', $this->getNamespace(), $invoiceId);
 
-        $response = $this->client->request('put', $endpoint, [
+        return $this->requestJson('put', $endpoint, [
             'json' => $categories,
         ]);
-
-        return json_decode($response->getBody()->getContents(), true);
     }
 
 }

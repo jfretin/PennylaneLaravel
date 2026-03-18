@@ -15,9 +15,7 @@ class LedgerEntryLines extends BaseApi
         if ($ledger_entry_id == '') {
             return null;
         }
-        $response = $this->client->request('get', $this->getNamespace() . "ledger_entries/$ledger_entry_id/ledger_entry_lines?page=$page&per_page=$per_page");
-
-        return json_decode($response->getBody()->getContents(), true);
+        return $this->requestJson('get', $this->getNamespace() . "ledger_entries/$ledger_entry_id/ledger_entry_lines?page=$page&per_page=$per_page");
     }
 
     /**
@@ -30,9 +28,7 @@ class LedgerEntryLines extends BaseApi
         if ($ledger_entry_line_id == '') {
             return null;
         }
-        $response = $this->client->request('get', $this->getNamespace() . "ledger_entry_lines/$ledger_entry_line_id/lettered_ledger_entry_lines?page=$page&per_page=$per_page");
-
-        return json_decode($response->getBody()->getContents(), true);
+        return $this->requestJson('get', $this->getNamespace() . "ledger_entry_lines/$ledger_entry_line_id/lettered_ledger_entry_lines?page=$page&per_page=$per_page");
     }
 
     /**
@@ -75,14 +71,12 @@ class LedgerEntryLines extends BaseApi
             throw new \InvalidArgumentException('Each ledger entry line must be an id or an array containing an id.');
         }, $ledger_entry_lines);
 
-        $response = $this->client->request('post', $this->getNamespace() . 'ledger_entry_lines/lettering', [
+        return $this->requestJson('post', $this->getNamespace() . 'ledger_entry_lines/lettering', [
             'json' => [
                 'unbalanced_lettering_strategy' => $unbalanced_lettering_strategy,
                 'ledger_entry_lines'           => $normalized_lines,
             ]
         ]);
-
-        return json_decode($response->getBody()->getContents(), true);
     }
 
     /**
@@ -105,8 +99,6 @@ class LedgerEntryLines extends BaseApi
         }
 
         $endpoint = sprintf('%sledger_entry_lines/%s', $this->getNamespace(), $ledger_entry_line_id);
-        $response = $this->client->request('get', $endpoint);
-
-        return json_decode($response->getBody()->getContents(), true);
+        return $this->requestJson('get', $endpoint);
     }
 }

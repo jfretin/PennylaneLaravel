@@ -36,11 +36,9 @@ class Attachment extends BaseApi
             ];
         }
 
-        $response = $this->client->request('post', $this->getNamespace() . "file_attachments", [
+        return $this->requestJson('post', $this->getNamespace() . "file_attachments", [
             'multipart' => $multipart,
         ]);
-
-        return json_decode($response->getBody()->getContents(), true);
     }
 
     /**

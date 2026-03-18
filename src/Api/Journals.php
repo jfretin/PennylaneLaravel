@@ -27,8 +27,6 @@ class Journals extends BaseApi
             $query['filter'] = $filter;
         }
         $query_string = http_build_query($query);
-        $response = $this->client->request('get', $this->getNamespace() . "journals?" . $query_string);
-
-        return json_decode($response->getBody()->getContents(), true);
+        return $this->requestJson('get', $this->getNamespace() . "journals?" . $query_string);
     }
 }

@@ -38,9 +38,7 @@ class CustomerInvoices extends BaseApi
         }
 
         $query_string = http_build_query($query);
-        $response = $this->client->request('get', $ns . 'customer_invoices' . ($query_string ? ('?' . $query_string) : ''));
-
-        return json_decode($response->getBody()->getContents(), true);
+        return $this->requestJson('get', $ns . 'customer_invoices' . ($query_string ? ('?' . $query_string) : ''));
     }
 
 
@@ -53,11 +51,9 @@ class CustomerInvoices extends BaseApi
     public function create(array $data)
     {
         $payload = $this->buildPayload($data, 'invoice');
-        $response = $this->client->request('post', $this->getNamespace() . "customer_invoices", [
+        return $this->requestJson('post', $this->getNamespace() . "customer_invoices", [
             'json' => $payload
         ]);
-
-        return json_decode($response->getBody()->getContents(), true);
     }
 
 
@@ -69,9 +65,7 @@ class CustomerInvoices extends BaseApi
      */
     public function get(string $id)
     {
-        $response = $this->client->request('get', $this->getNamespace() . "customer_invoices/{$id}");
-
-        return json_decode($response->getBody()->getContents(), true);
+        return $this->requestJson('get', $this->getNamespace() . "customer_invoices/{$id}");
     }
 
 
@@ -91,11 +85,9 @@ class CustomerInvoices extends BaseApi
             'invoice' => $data,
         ];
         $payload = $this->buildPayload($base, 'invoice');
-        $response = $this->client->request('post', $this->getNamespace() . "customer_invoices/import", [
+        return $this->requestJson('post', $this->getNamespace() . "customer_invoices/import", [
             'json' => $payload
         ]);
-
-        return json_decode($response->getBody()->getContents(), true);
     }
 
     /**
@@ -117,7 +109,7 @@ class CustomerInvoices extends BaseApi
         }
 
         $endpoint = sprintf('%scustomer_invoices/%s', $this->getNamespace(), $customerInvoiceId);
-        $response = $this->client->request('delete', $endpoint);
+        $response = $this->request('delete', $endpoint);
         $statusCode = $response->getStatusCode();
 
         if ($statusCode !== 204) {

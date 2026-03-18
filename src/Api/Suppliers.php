@@ -31,9 +31,7 @@ class Suppliers extends BaseApi
 
         $query_string = http_build_query($query);
         $url = $ns . 'suppliers' . ($query_string ? ('?' . $query_string) : '');
-        $response = $this->client->request('get', $url);
-
-        return json_decode($response->getBody()->getContents(), true);
+        return $this->requestJson('get', $url);
     }
 
 
@@ -47,11 +45,9 @@ class Suppliers extends BaseApi
         $ns = $this->getNamespace();
         $payload = $this->buildPayload($data, 'supplier');
 
-        $response = $this->client->request('post', $ns . 'suppliers', [
+        return $this->requestJson('post', $ns . 'suppliers', [
             'json' => $payload,
         ]);
-
-        return json_decode($response->getBody()->getContents(), true);
     }
 
 
@@ -63,9 +59,7 @@ class Suppliers extends BaseApi
     public function get($id)
     {
         $ns = $this->getNamespace();
-        $response = $this->client->request('get', $ns . "suppliers/{$id}");
-
-        return json_decode($response->getBody()->getContents(), true);
+        return $this->requestJson('get', $ns . "suppliers/{$id}");
     }
 
 
@@ -79,10 +73,8 @@ class Suppliers extends BaseApi
         $ns = $this->getNamespace();
         $payload = $this->buildPayload($data, 'supplier');
 
-        $response = $this->client->request('put', $ns . "suppliers/{$id}", [
+        return $this->requestJson('put', $ns . "suppliers/{$id}", [
             'json' => $payload,
         ]);
-
-        return json_decode($response->getBody()->getContents(), true);
     }
 }

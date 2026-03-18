@@ -11,9 +11,7 @@ class Products extends BaseApi
      */
     public function list()
     {
-        $response = $this->client->request('get', $this->getNamespace() . "products");
-
-        return json_decode($response->getBody()->getContents(), true);
+        return $this->requestJson('get', $this->getNamespace() . "products");
     }
 
 
@@ -26,11 +24,9 @@ class Products extends BaseApi
     public function create(array $data)
     {
         $payload = $this->buildPayload($data, 'product');
-        $response = $this->client->request('post', $this->getNamespace() . "products", [
+        return $this->requestJson('post', $this->getNamespace() . "products", [
             'json' => $payload,
         ]);
-
-        return json_decode($response->getBody()->getContents(), true);
     }
 
 
@@ -42,9 +38,7 @@ class Products extends BaseApi
      */
     public function get(string $id)
     {
-        $response = $this->client->request('get', $this->getNamespace() . "products/{$id}");
-
-        return json_decode($response->getBody()->getContents(), true);
+        return $this->requestJson('get', $this->getNamespace() . "products/{$id}");
     }
 
 
@@ -58,10 +52,8 @@ class Products extends BaseApi
     public function update(string $id, array $data)
     {
         $payload = $this->buildPayload($data, 'product');
-        $response = $this->client->request('put', $this->getNamespace() . "products/{$id}", [
+        return $this->requestJson('put', $this->getNamespace() . "products/{$id}", [
             'json' => $payload,
         ]);
-
-        return json_decode($response->getBody()->getContents(), true);
     }
 }

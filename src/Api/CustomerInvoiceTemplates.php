@@ -35,8 +35,6 @@ class CustomerInvoiceTemplates extends BaseApi
 
         $query_string = http_build_query($query);
         $endpoint = $this->getNamespace() . 'customer_invoice_templates' . ($query_string ? ('?' . $query_string) : '');
-        $response = $this->client->request('get', $endpoint);
-
-        return json_decode($response->getBody()->getContents(), true);
+        return $this->requestJson('get', $endpoint);
     }
 }

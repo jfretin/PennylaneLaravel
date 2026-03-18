@@ -12,13 +12,11 @@ class Estimates extends BaseApi
      */
     public function list(array $filters = [])
     {
-        $response = $this->client->request('get', $this->getNamespace() . "customer_estimates", [
+        return $this->requestJson('get', $this->getNamespace() . "customer_estimates", [
             'query' => [
                 'filter' => json_encode($filters)
             ]
         ]);
-
-        return json_decode($response->getBody()->getContents(), true);
     }
 
     /**
@@ -37,11 +35,9 @@ class Estimates extends BaseApi
             'estimate' => $data,
         ];
         $payload = $this->buildPayload($base, 'estimate');
-        $response = $this->client->request('post', $this->getNamespace() . "customer_estimates", [
+        return $this->requestJson('post', $this->getNamespace() . "customer_estimates", [
             'json' => $payload,
         ]);
-
-        return json_decode($response->getBody()->getContents(), true);
     }
 
 
@@ -53,8 +49,6 @@ class Estimates extends BaseApi
      */
     public function get(string $id)
     {
-        $response = $this->client->request('get', $this->getNamespace() . "customer_estimates/{$id}");
-
-        return json_decode($response->getBody()->getContents(), true);
+        return $this->requestJson('get', $this->getNamespace() . "customer_estimates/{$id}");
     }
 }

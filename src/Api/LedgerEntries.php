@@ -41,9 +41,7 @@ class LedgerEntries extends BaseApi
             $query['sort'] = $sort;
         }
         $query_string = http_build_query($query);
-        $response = $this->client->request('get', $this->getNamespace() . "ledger_entries?" . $query_string);
-
-        return json_decode($response->getBody()->getContents(), true);
+        return $this->requestJson('get', $this->getNamespace() . "ledger_entries?" . $query_string);
     }
 
     /**
@@ -65,9 +63,7 @@ class LedgerEntries extends BaseApi
         }
 
         $endpoint = sprintf('%sledger_entries/%s', $this->getNamespace(), $ledgerEntryId);
-        $response = $this->client->request('get', $endpoint);
-
-        return json_decode($response->getBody()->getContents(), true);
+        return $this->requestJson('get', $endpoint);
     }
 
     /**
@@ -86,11 +82,9 @@ class LedgerEntries extends BaseApi
 
         $payload = $this->buildPayload(['ledger_entry' => $ledger_entry], 'ledger_entry');
 
-        $response = $this->client->request('post', $this->getNamespace() . 'ledger_entries', [
+        return $this->requestJson('post', $this->getNamespace() . 'ledger_entries', [
             'json' => $payload,
         ]);
-
-        return json_decode($response->getBody()->getContents(), true);
     }
 
     /**
@@ -115,11 +109,9 @@ class LedgerEntries extends BaseApi
         $payload = $this->buildPayload(['ledger_entry' => $ledger_entry], 'ledger_entry');
         $endpoint = sprintf('%sledger_entries/%s', $this->getNamespace(), $ledgerEntryId);
 
-        $response = $this->client->request('put', $endpoint, [
+        return $this->requestJson('put', $endpoint, [
             'json' => $payload,
         ]);
-
-        return json_decode($response->getBody()->getContents(), true);
     }
 
     /**
@@ -141,8 +133,6 @@ class LedgerEntries extends BaseApi
         }
 
         $endpoint = sprintf('%sledger_entries/%s', $this->getNamespace(), $ledgerEntryId);
-        $response = $this->client->request('delete', $endpoint);
-
-        return json_decode($response->getBody()->getContents(), true);
+        return $this->requestJson('delete', $endpoint);
     }
 }

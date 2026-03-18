@@ -1,5 +1,3 @@
-
-
 # 2026 API changes Migration Guide
 
 This full guide is here to help you implement all necessary changes that are coming to the Pennylane API in 2026, including ledger scope changes, pagination updates, and other improvements across multiple endpoints.
@@ -7,6 +5,8 @@ This full guide is here to help you implement all necessary changes that are com
 The Pennylane API is introducing important changes. This guide explains what's changing and how to migrate your integration smoothly using our phased rollout approach.
 
 :warning:**You will need to have finished the migration by 1st of July 2026 at the latest**. You have in total 24 weeks to complete the migration.
+
+**Important**: To apply the changes, you need to use a header in your API requests. [Here is how to do it](https://pennylane.readme.io/docs/2026-api-changes-guide#-migration-strategy).
 
 ***
 
@@ -21,6 +21,7 @@ The `ledger`  scope is being **deprecated** and replaced with more granular scop
 | `ledger`  | `journals:readonly` / `journals:all`               |
 |           | `ledger_accounts:readonly` / `ledger_accounts:all` |
 |           | `ledger_entries:readonly` / `ledger_entries:all`   |
+|           | `file_attachments:all`                             |
 
 > **Note:**
 >
@@ -466,8 +467,10 @@ We're using a **three-phase rollout** to ensure a smooth transition:
 
 ## Phase 1: Preview Phase (12 weeks)
 
-**Timeline:** Starting 14th of January 2026\
-**Default Behavior:** Old behavior\
+**Timeline:** Starting 14th of January 2026
+
+**Default Behavior:** Old behavior
+
 **Action Required:** Opt-in to test and migrate to the new behavior
 
 During this phase, the new behavior is **opt-in only**. This is your opportunity to test the changes without any risk.
@@ -493,7 +496,10 @@ curl "https://api.pennylane.com/api/external/v2/ledger_entries?use_2026_api_chan
 
 ## Phase 2: Sunset Phase (12 weeks)
 
-**Default Behavior:** New behavior ⚠️ **BREAKING CHANGE**\
+**Timeline:** Starting 8th of April 2026
+
+**Default Behavior:** New behavior ⚠️ **BREAKING CHANGE**
+
 **Action Required:** Opt-out if you need more time to migrate
 
 During this phase, the new behavior becomes the **default**. If you're not ready, you can temporarily opt-out.
@@ -524,6 +530,7 @@ curl "https://api.pennylane.com/api/external/v2/ledger_entries?use_2026_api_chan
 ## Phase 3: Cleanup Phase (Permanent)
 
 **Timeline:** At the end of the sunset phase, **on 1st of July 2026.**
+
 **Default Behavior:** New behavior only
 
 During this phase:
@@ -633,7 +640,7 @@ The Preview phase begins on **14th of January 2026**.
 
 The new behavior is adopted across all endpoints by default on the **8th of April 2026**.
 
-\*\*By 1st of July 2026, no rollback is possible. \*\* You have in total 24 weeks to complete the migration.
+**By 1st of July 2026, no rollback is possible.** You have in total 24 weeks to complete the migration.
 
 ### Do I need to update my OAuth scopes immediately?
 
@@ -695,20 +702,20 @@ No, this is only about the V2 API.
 
 Use this checklist to track your migration progress:
 
-* \[ ] Review all affected endpoints in your integration
-* \[ ] Update OAuth scopes from `ledger` to granular scopes, or generate a new developer token if necessary
-* \[ ] Test with `X-Use-2026-API-Changes: true` in staging
-* \[ ] Update code to use new object structures (`journal`, `ledger_account`, `attachment`)
-* \[ ] Update code to use `file_attachment_id` instead of `ledger_attachment_id`
-* \[ ] Rely on `ledger_entry` **unsuffixed** ID in response and request.
-* \[ ] Rely on the new cursor base pagination system
-* \[ ] Add explicit `sort` parameter if you rely on ascending order
-* \[ ] Add explicit `date` filtering if you rely on fiscal year filtering
-* \[ ] Update error handling for new 404 error messages
-* \[ ] Test all ledger-related API calls
-* \[ ] Deploy to production with header set
-* \[ ] Monitor for errors after Sunset phase begins
-* \[ ] Remove header after Cleanup phase (optional, but recommended)
+* [ ] Review all affected endpoints in your integration
+* [ ] Update OAuth scopes from `ledger` to granular scopes, or generate a new developer token if necessary
+* [ ] Test with `X-Use-2026-API-Changes: true` in staging
+* [ ] Update code to use new object structures (`journal`, `ledger_account`, `attachment`)
+* [ ] Update code to use `file_attachment_id` instead of `ledger_attachment_id`
+* [ ] Rely on `ledger_entry` **unsuffixed** ID in response and request.
+* [ ] Rely on the new cursor base pagination system
+* [ ] Add explicit `sort` parameter if you rely on ascending order
+* [ ] Add explicit `date` filtering if you rely on fiscal year filtering
+* [ ] Update error handling for new 404 error messages
+* [ ] Test all ledger-related API calls
+* [ ] Deploy to production with header set
+* [ ] Monitor for errors after Sunset phase begins
+* [ ] Remove header after Cleanup phase (optional, but recommended)
 
 ***
 

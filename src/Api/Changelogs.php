@@ -109,14 +109,12 @@ class Changelogs extends BaseApi
         $query = $this->normalizeParameters($parameters);
         $queryString = $query ? ('?' . http_build_query($query)) : '';
 
-        $response = $this->client->request('get', sprintf(
+        return $this->requestJson('get', sprintf(
             '%schangelogs/%s%s',
             $this->getNamespace(),
             $resource,
             $queryString
         ));
-
-        return json_decode($response->getBody()->getContents(), true);
     }
 
     /**

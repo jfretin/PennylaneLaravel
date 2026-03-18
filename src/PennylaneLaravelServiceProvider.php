@@ -55,6 +55,17 @@ class PennylaneLaravelServiceProvider extends ServiceProvider
         // Automatically apply the package configuration
         $this->mergeConfigFrom(__DIR__.'/../config/config.php', 'pennylane-laravel');
 
+        $use2026ApiChanges = config('pennylane-laravel.use_2026_api_changes');
+        $v2Headers = [
+            "Authorization" => "Bearer ".config('pennylane-laravel.v2_key'),
+        ];
+        if ($use2026ApiChanges !== null && $use2026ApiChanges !== '') {
+            $normalized2026Header = filter_var($use2026ApiChanges, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+            if ($normalized2026Header !== null) {
+                $v2Headers['X-Use-2026-API-Changes'] = $normalized2026Header ? 'true' : 'false';
+            }
+        }
+
         $client_v1 = PennylaneClientFactory::createClient([
             'base_uri' => config('pennylane-laravel.endpoint'),
             'headers' => [
@@ -63,9 +74,7 @@ class PennylaneLaravelServiceProvider extends ServiceProvider
         ]);
         $client_v2 = PennylaneClientFactory::createClient([
             'base_uri' => config('pennylane-laravel.endpoint'),
-            'headers' => [
-                "Authorization" => "Bearer ".config('pennylane-laravel.v2_key')
-            ]
+            'headers' => $v2Headers,
         ], true, 'v2');
 
         // Register the main class to use with the facade

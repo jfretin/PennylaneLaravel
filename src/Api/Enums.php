@@ -13,12 +13,10 @@ class Enums extends BaseApi
      */
     public function get(string $id, $locale = 'en')
     {
-        $response = $this->client->request('get', $this->getNamespace() . "enums/{$id}", [
+        return $this->requestJson('get', $this->getNamespace() . "enums/{$id}", [
             'query' => [
                 'locale' => $locale
             ]
         ]);
-
-        return json_decode($response->getBody()->getContents(), true);
     }
 }

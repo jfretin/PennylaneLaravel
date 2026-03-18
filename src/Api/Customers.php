@@ -46,9 +46,7 @@ class Customers extends BaseApi
         }
 
         $query_string = http_build_query($query);
-        $response = $this->client->request('get', $ns . 'customers' . ($query_string ? ('?' . $query_string) : ''));
-
-        return json_decode($response->getBody()->getContents(), true);
+        return $this->requestJson('get', $ns . 'customers' . ($query_string ? ('?' . $query_string) : ''));
     }
 
 
@@ -64,11 +62,9 @@ class Customers extends BaseApi
         $payload = $this->stripInternalKeys($payload);
         $endpoint = $customer_type === 'individual' ? 'individual_customers' : 'company_customers';
 
-        $response = $this->client->request('post', $ns . $endpoint, [
+        return $this->requestJson('post', $ns . $endpoint, [
             'json' => $payload,
         ]);
-
-        return json_decode($response->getBody()->getContents(), true);
     }
 
 
@@ -79,9 +75,7 @@ class Customers extends BaseApi
     public function get($id)
     {
         $ns = $this->getNamespace();
-        $response = $this->client->request('get', $ns . "customers/{$id}");
-
-        return json_decode($response->getBody()->getContents(), true);
+        return $this->requestJson('get', $ns . "customers/{$id}");
     }
 
 
@@ -97,11 +91,9 @@ class Customers extends BaseApi
         $payload = $this->stripInternalKeys($payload);
         $endpoint = $customer_type === 'individual' ? 'individual_customers' : 'company_customers';
 
-        $response = $this->client->request('put', $ns . "{$endpoint}/{$id}", [
+        return $this->requestJson('put', $ns . "{$endpoint}/{$id}", [
             'json' => $payload,
         ]);
-
-        return json_decode($response->getBody()->getContents(), true);
     }
 
     /**

@@ -6,5 +6,6 @@
 return [
     'endpoint' => env('PENNYLANE_API_ENDPOINT', 'https://app.pennylane.tech/api/external/'),
     'v1_key' => env('PENNYLANE_API_KEY'),
-    'v2_key' => env('PENNYLANE_API_V2_KEY')
+    'v2_key' => env('PENNYLANE_API_V2_KEY'),
+    'use_2026_api_changes' => env('PENNYLANE_USE_2026_API_CHANGES'),
 ];
