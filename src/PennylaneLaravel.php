@@ -50,7 +50,7 @@ class PennylaneLaravel
     public function customers($version = null)
     {
         [$client, $ns] = $this->resolveVersionAndClient($version);
-        return new Customers($client, $ns);
+        return $this->configureResource(new Customers($client, $ns), 'customers');
     }
 
     /**
@@ -62,7 +62,7 @@ class PennylaneLaravel
     public function suppliers($version = null)
     {
         [$client, $ns] = $this->resolveVersionAndClient($version);
-        return new Suppliers($client, $ns);
+        return $this->configureResource(new Suppliers($client, $ns), 'suppliers');
     }
 
     /**
@@ -70,7 +70,7 @@ class PennylaneLaravel
      */
     public function suppliers2()
     {
-        return new Suppliers($this->client_v2, BaseApi::API_NAMESPACE_V2);
+        return $this->configureResource(new Suppliers($this->client_v2, BaseApi::API_NAMESPACE_V2), 'suppliers');
     }
 
     /**
@@ -79,7 +79,7 @@ class PennylaneLaravel
     public function products($version = null)
     {
         [$client, $ns] = $this->resolveVersionAndClient($version);
-        return new Products($client, $ns);
+        return $this->configureResource(new Products($client, $ns), 'products');
     }
 
     /**
@@ -88,7 +88,7 @@ class PennylaneLaravel
     public function customer_invoices($version = null)
     {
         [$client, $ns] = $this->resolveVersionAndClient($version);
-        return new CustomerInvoices($client, $ns);
+        return $this->configureResource(new CustomerInvoices($client, $ns), 'customer_invoices');
     }
 
     /**
@@ -97,7 +97,7 @@ class PennylaneLaravel
     public function supplier_invoices($version = null)
     {
         [$client, $ns] = $this->resolveVersionAndClient($version);
-        return new SupplierInvoices($client, $ns);
+        return $this->configureResource(new SupplierInvoices($client, $ns), 'supplier_invoices');
     }
 
     /**
@@ -107,7 +107,7 @@ class PennylaneLaravel
      */
     public function customer_invoice_templates()
     {
-        return new CustomerInvoiceTemplates($this->client_v2);
+        return $this->configureResource(new CustomerInvoiceTemplates($this->client_v2), 'customer_invoice_templates');
     }
 
     /**
@@ -116,7 +116,7 @@ class PennylaneLaravel
     public function estimates($version = null)
     {
         [$client, $ns] = $this->resolveVersionAndClient($version);
-        return new Estimates($client, $ns);
+        return $this->configureResource(new Estimates($client, $ns), 'estimates');
     }
 
     /**
@@ -125,7 +125,7 @@ class PennylaneLaravel
     public function enums($version = null)
     {
         [$client, $ns] = $this->resolveVersionAndClient($version);
-        return new Enums($client, $ns);
+        return $this->configureResource(new Enums($client, $ns), 'enums');
     }
 
     /**
@@ -134,7 +134,7 @@ class PennylaneLaravel
     public function categories($version = null)
     {
         [$client, $ns] = $this->resolveVersionAndClient($version);
-        return new Categories($client, $ns);
+        return $this->configureResource(new Categories($client, $ns), 'categories');
     }
 
     /**
@@ -143,37 +143,37 @@ class PennylaneLaravel
     public function plan_items($version = null)
     {
         [$client, $ns] = $this->resolveVersionAndClient($version);
-        return new PlanItems($client, $ns);
+        return $this->configureResource(new PlanItems($client, $ns), 'plan_items');
     }
 
     public function ledger_entries()
     {
-        return new LedgerEntries($this->client_v2);
+        return $this->configureResource(new LedgerEntries($this->client_v2), 'ledger_entries');
     }
 
     public function ledger_entry_lines()
     {
-        return new LedgerEntryLines($this->client_v2);
+        return $this->configureResource(new LedgerEntryLines($this->client_v2), 'ledger_entry_lines');
     }
 
     public function ledger_accounts()
     {
-        return new LedgerAccounts($this->client_v2);
+        return $this->configureResource(new LedgerAccounts($this->client_v2), 'ledger_accounts');
     }
 
     public function attachments()
     {
-        return new Attachment($this->client_v2);
+        return $this->configureResource(new Attachment($this->client_v2), 'attachments');
     }
 
     public function journals()
     {
-        return new Journals($this->client_v2);
+        return $this->configureResource(new Journals($this->client_v2), 'journals');
     }
 
     public function changelogs()
     {
-        return new Changelogs($this->client_v2, BaseApi::API_NAMESPACE_V2);
+        return $this->configureResource(new Changelogs($this->client_v2, BaseApi::API_NAMESPACE_V2), 'changelogs');
     }
 
     /**
@@ -190,5 +190,44 @@ class PennylaneLaravel
         }
         // Default to v1
         return [$this->client, BaseApi::API_NAMESPACE_V1];
+    }
+
+    /**
+     * Apply the configured 2026 behavior override for a resource, if any.
+     *
+     * @param BaseApi $resource
+     * @param string $resourceKey
+     * @return BaseApi
+     * @author Jonathan F. <jonathan.f@mistersmoke.com>
+     */
+    private function configureResource(BaseApi $resource, string $resourceKey): BaseApi
+    {
+        $override = $this->resolve2026ApiChangesOverride($resourceKey);
+        if ($override === null) {
+            return $resource;
+        }
+
+        return $resource->with2026ApiChanges($override);
+    }
+
+    /**
+     * Resolve the resource-specific 2026 behavior override from configuration.
+     *
+     * @param string $resourceKey
+     * @return bool|null
+     * @author Jonathan F. <jonathan.f@mistersmoke.com>
+     */
+    private function resolve2026ApiChangesOverride(string $resourceKey): ?bool
+    {
+        $configured = config('pennylane-laravel.use_2026_api_changes_overrides.' . $resourceKey);
+        if ($configured === null || $configured === '') {
+            return null;
+        }
+
+        if (is_bool($configured)) {
+            return $configured;
+        }
+
+        return filter_var($configured, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
     }
 }
