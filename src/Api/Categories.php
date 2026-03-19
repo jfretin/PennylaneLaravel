@@ -60,7 +60,7 @@ class Categories extends BaseApi
         $sort = $this->sortQuery($sort, $this->isV2() ? $this->sort_fields_v2 : $this->sort_fields_v1);
         $query = [
         ];
-        $useCursorPagination = $this->isV2() && func_num_args() >= 5;
+        $useCursorPagination = $this->isV2() && $this->uses2026ApiChanges() && func_num_args() >= 5;
 
         if ($useCursorPagination) {
             $query['limit'] = $per_page;

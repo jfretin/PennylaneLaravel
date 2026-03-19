@@ -5,30 +5,98 @@ namespace Ashraam\PennylaneLaravel\Api;
 class LedgerEntryLines extends BaseApi
 {
     protected $defaultNamespace = self::API_NAMESPACE_V2;
+
+    use Filterable;
+
+    private $filter_fields = [
+        'ledger_account_id',
+    ];
+
+    private $sort_fields = [
+        'id',
+    ];
+
     /**
-     * List all entries
-     * 
+     * List ledger entry lines of a ledger entry.
+     *
+     * @param int|string $ledger_entry_id
+     * @param int $page Ignored when a cursor is provided.
+     * @param int $per_page Items per page / cursor page size.
+     * @param array $filters Optional filters.
+     * @param string|null $sort Optional sort field.
+     * @param string|null $cursor Optional cursor for V2 pagination.
      * @return array
+     * @author Jonathan F. <jonathan.f@mistersmoke.com>
      */
-    public function list($ledger_entry_id, $page = 1, $per_page = 20)
+    public function list($ledger_entry_id, $page = 1, $per_page = 20, array $filters = [], ?string $sort = null, ?string $cursor = null)
     {
         if ($ledger_entry_id == '') {
             return null;
         }
-        return $this->requestJson('get', $this->getNamespace() . "ledger_entries/$ledger_entry_id/ledger_entry_lines?page=$page&per_page=$per_page");
+
+        $query = [];
+        $filter = $this->get_filters($filters);
+        $sort = $this->get_sort($sort);
+        $useCursorPagination = $this->isV2() && $this->uses2026ApiChanges() && func_num_args() >= 6;
+
+        if ($useCursorPagination) {
+            $query['limit'] = $per_page;
+            if ($cursor !== null) {
+                $query['cursor'] = $cursor;
+            }
+        } else {
+            $query['page'] = $page;
+            $query['per_page'] = $per_page;
+        }
+
+        if ($filter != '') {
+            $query['filter'] = $filter;
+        }
+        if ($sort != '') {
+            $query['sort'] = $sort;
+        }
+
+        $queryString = http_build_query($query);
+        return $this->requestJson('get', $this->getNamespace() . "ledger_entries/$ledger_entry_id/ledger_entry_lines" . ($queryString ? ('?' . $queryString) : ''));
     }
 
     /**
-     * List all entries
+     * List ledger entry lines lettered to a given ledger entry line.
      *
+     * @param int|string $ledger_entry_line_id
+     * @param int $page Ignored when a cursor is provided.
+     * @param int $per_page Items per page / cursor page size.
+     * @param string|null $sort Optional sort field.
+     * @param string|null $cursor Optional cursor for V2 pagination.
      * @return array
+     * @author Jonathan F. <jonathan.f@mistersmoke.com>
      */
-    public function listLinked($ledger_entry_line_id, $page = 1, $per_page = 20)
+    public function listLinked($ledger_entry_line_id, $page = 1, $per_page = 20, ?string $sort = null, ?string $cursor = null)
     {
         if ($ledger_entry_line_id == '') {
             return null;
         }
-        return $this->requestJson('get', $this->getNamespace() . "ledger_entry_lines/$ledger_entry_line_id/lettered_ledger_entry_lines?page=$page&per_page=$per_page");
+
+        $query = [];
+        $sort = $this->get_sort($sort);
+        $useCursorPagination = $this->isV2() && $this->uses2026ApiChanges() && func_num_args() >= 5;
+
+        if ($useCursorPagination) {
+            $query['limit'] = $per_page;
+            if ($cursor !== null) {
+                $query['cursor'] = $cursor;
+            }
+        } else {
+            $query['page'] = $page;
+            $query['per_page'] = $per_page;
+        }
+
+        if ($sort != '') {
+            $query['sort'] = $sort;
+        }
+
+        $queryString = http_build_query($query);
+        return $this->requestJson('get', $this->getNamespace() . "ledger_entry_lines/$ledger_entry_line_id/lettered_ledger_entry_lines" . ($queryString ? ('?' . $queryString) : ''));
     }
 
     /**

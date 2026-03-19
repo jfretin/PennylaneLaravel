@@ -48,6 +48,30 @@ abstract class BaseApi
     }
 
     /**
+     * Resolve whether the 2026 API behavior is effectively enabled for this resource.
+     *
+     * @return bool
+     * @author Jonathan F. <jonathan.f@mistersmoke.com>
+     */
+    protected function uses2026ApiChanges(): bool
+    {
+        if ($this->use2026ApiChangesOverride !== null) {
+            return $this->use2026ApiChangesOverride;
+        }
+
+        $configured = config('pennylane-laravel.use_2026_api_changes');
+        if ($configured === null || $configured === '') {
+            return false;
+        }
+
+        if (is_bool($configured)) {
+            return $configured;
+        }
+
+        return filter_var($configured, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? false;
+    }
+
+    /**
      * Build payload by applying a version-specific root envelope.
      * - V1: ensures payload is wrapped under $envelope if not already
      * - V2: unwraps $envelope to top-level while preserving other keys

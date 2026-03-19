@@ -34,7 +34,7 @@ class Journals extends BaseApi
         $filter = $this->get_filters($filters);
         $sort = $this->get_sort($sort);
         $query = [];
-        $useCursorPagination = $this->isV2() && func_num_args() >= 5;
+        $useCursorPagination = $this->isV2() && $this->uses2026ApiChanges() && func_num_args() >= 5;
 
         if ($useCursorPagination) {
             // The public method keeps the legacy $per_page argument, but V2 expects it as `limit`.

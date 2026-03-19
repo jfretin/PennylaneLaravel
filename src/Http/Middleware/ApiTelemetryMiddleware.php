@@ -73,6 +73,7 @@ class ApiTelemetryMiddleware
             'api_version' => $this->apiVersion,
             'method' => strtoupper($request->getMethod()),
             'endpoint' => $request->getUri()->getPath(),
+            'use_2026_api_changes' => $this->resolve2026ApiChangesFlag($request),
             'status_code' => $response ? $response->getStatusCode() : null,
             'started_at' => gmdate('Y-m-d H:i:s', (int) $startedAt),
             'finished_at' => gmdate('Y-m-d H:i:s', (int) $finishedAt),
@@ -105,6 +106,16 @@ class ApiTelemetryMiddleware
         }
 
         return hash('sha256', $token);
+    }
+
+    private function resolve2026ApiChangesFlag(RequestInterface $request): ?bool
+    {
+        $header = trim($request->getHeaderLine('X-Use-2026-API-Changes'));
+        if ($header === '') {
+            return null;
+        }
+
+        return filter_var($header, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
     }
 
     private function parseIntHeader(?ResponseInterface $response, string $header): ?int
