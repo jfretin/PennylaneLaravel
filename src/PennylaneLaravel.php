@@ -9,11 +9,13 @@ use Ashraam\PennylaneLaravel\Api\Categories;
 use Ashraam\PennylaneLaravel\Api\CustomerInvoices;
 use Ashraam\PennylaneLaravel\Api\CustomerInvoiceTemplates;
 use Ashraam\PennylaneLaravel\Api\SupplierInvoices;
+use Ashraam\PennylaneLaravel\Api\BankAccounts;
 use Ashraam\PennylaneLaravel\Api\Products;
 use Ashraam\PennylaneLaravel\Api\Customers;
 use Ashraam\PennylaneLaravel\Api\Suppliers;
 use Ashraam\PennylaneLaravel\Api\Estimates;
 use Ashraam\PennylaneLaravel\Api\PlanItems;
+use Ashraam\PennylaneLaravel\Api\Transactions;
 use Ashraam\PennylaneLaravel\Api\LedgerEntries;
 use Ashraam\PennylaneLaravel\Api\LedgerEntryLines;
 use Ashraam\PennylaneLaravel\Api\LedgerAccounts;
@@ -144,6 +146,26 @@ class PennylaneLaravel
     {
         [$client, $ns] = $this->resolveVersionAndClient($version);
         return $this->configureResource(new PlanItems($client, $ns), 'plan_items');
+    }
+
+    /**
+     * Bank accounts accessor (V2 only).
+     *
+     * @author Jonathan F. <jonathan.f@mistersmoke.com>
+     */
+    public function bank_accounts()
+    {
+        return $this->configureResource(new BankAccounts($this->client_v2, BaseApi::API_NAMESPACE_V2), 'bank_accounts');
+    }
+
+    /**
+     * Transactions accessor (V2 only).
+     *
+     * @author Jonathan F. <jonathan.f@mistersmoke.com>
+     */
+    public function transactions()
+    {
+        return $this->configureResource(new Transactions($this->client_v2, BaseApi::API_NAMESPACE_V2), 'transactions');
     }
 
     public function ledger_entries()

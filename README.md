@@ -244,6 +244,111 @@ $accounts = PennylaneLaravel::ledger_accounts()->list(1, 25, [['field'=>'number'
 ```
 ___
 
+### V2 List bank accounts
+```php
+$bankAccounts = PennylaneLaravel::bank_accounts()->list(per_page: 50, sort: '-id', cursor: null);
+```
+___
+
+### V2 Get a bank account by its ID
+```php
+$bankAccount = PennylaneLaravel::bank_accounts()->get(42);
+```
+___
+
+### V2 Create a bank account
+```php
+$bankAccount = PennylaneLaravel::bank_accounts()->create([
+    'name' => 'Main account',
+    'iban' => 'FR1420041010050500013M02606',
+    'bic' => 'BNPAFRPPXXX',
+    'currency' => 'EUR',
+    'account_type' => 'current',
+]);
+```
+___
+
+### V2 List transactions
+```php
+$transactions = PennylaneLaravel::transactions()->list(
+    per_page: 100,
+    filters: [
+        [
+            'field' => 'bank_account_id',
+            'operator' => 'eq',
+            'value' => '42',
+        ],
+        [
+            'field' => 'date',
+            'operator' => 'gteq',
+            'value' => '2026-01-01',
+        ],
+    ],
+    sort: '-id',
+    cursor: null,
+);
+```
+___
+
+### V2 Get a transaction by its ID
+```php
+$transaction = PennylaneLaravel::transactions()->get(42);
+```
+___
+
+### V2 Create a transaction
+```php
+$transaction = PennylaneLaravel::transactions()->create([
+    'bank_account_id' => 42,
+    'label' => 'SEPA transfer supplier',
+    'date' => '2026-04-09',
+    'amount' => '120.00',
+    'fee' => '0.00',
+]);
+```
+___
+
+### V2 Update a transaction
+```php
+$transaction = PennylaneLaravel::transactions()->update(42, [
+    'supplier_id' => 84,
+]);
+```
+___
+
+### V2 List invoices matched to a transaction
+```php
+$matchedInvoices = PennylaneLaravel::transactions()->matchedInvoices(42, [
+    'limit' => 50,
+    'cursor' => null,
+]);
+```
+___
+
+### V2 List categories of a transaction
+```php
+$categories = PennylaneLaravel::transactions()->categories(42, [
+    'limit' => 50,
+    'cursor' => null,
+]);
+```
+___
+
+### V2 Replace categories of a transaction
+```php
+$categories = PennylaneLaravel::transactions()->setCategories(42, [
+    [
+        'id' => 59,
+        'weight' => '0.5',
+    ],
+    [
+        'id' => 33,
+        'weight' => '0.5',
+    ],
+]);
+```
+___
+
 ### Changelog
 
 Please see [CHANGELOG](CHANGELOG.md) for more information what has changed recently.
