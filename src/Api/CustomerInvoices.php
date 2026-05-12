@@ -68,6 +68,39 @@ class CustomerInvoices extends BaseApi
         return $this->requestJson('get', $this->getNamespace() . "customer_invoices/{$id}");
     }
 
+    /**
+     * Mark a customer invoice as paid using the V2 API.
+     *
+     * @param int|string $customerInvoiceId
+     * @return bool
+     * @throws \RuntimeException When the API namespace is not V2
+     * @author Jonathan F. <jonathan.f@mistersmoke.com>
+     */
+    public function markAsPaid(int|string $customerInvoiceId): bool
+    {
+        if ($customerInvoiceId === '' || $customerInvoiceId === null) {
+            throw new \InvalidArgumentException('Customer invoice id is required.');
+        }
+
+        if (!$this->isV2()) {
+            throw new \RuntimeException('Customer invoice mark as paid is only available with the V2 API.');
+        }
+
+        $response = $this->request(
+            'put',
+            sprintf('%scustomer_invoices/%s/mark_as_paid', $this->getNamespace(), $customerInvoiceId)
+        );
+
+        if ($response->getStatusCode() !== 204) {
+            throw new \RuntimeException(sprintf(
+                'Unexpected response status when marking customer invoice as paid: %s.',
+                $response->getStatusCode()
+            ));
+        }
+
+        return true;
+    }
+
 
     /**
      * Import an invoice
