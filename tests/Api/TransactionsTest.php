@@ -13,9 +13,14 @@ use GuzzleHttp\Psr7\Response;
 
 class TransactionsTest extends TestCase
 {
+    /**
+     * @var array<int, array<string, mixed>>
+     */
+    private array $history = [];
+
     public function testListUsesV2TransactionsEndpointWithCursorFilterAndSort(): void
     {
-        [$api, $history] = $this->makeApi([
+        $api = $this->makeApi([
             new Response(200, [], json_encode(['items' => [], 'has_more' => false, 'next_cursor' => null])),
         ]);
 
@@ -24,22 +29,23 @@ class TransactionsTest extends TestCase
             ['field' => 'ignored', 'operator' => 'eq', 'value' => 'nope'],
         ], '-id', 'cursor_abc');
 
-        $request = $history[0]['request'];
+        $request = $this->history[0]['request'];
+        $uri = $request->getUri();
 
         $this->assertSame('GET', $request->getMethod());
-        $this->assertStringStartsWith('/v2/transactions?', (string) $request->getUri());
-        $this->assertStringContainsString('limit=100', (string) $request->getUri());
-        $this->assertStringContainsString('cursor=cursor_abc', (string) $request->getUri());
-        $this->assertStringContainsString('sort=-id', (string) $request->getUri());
+        $this->assertSame('/v2/transactions', $uri->getPath());
+        $this->assertStringContainsString('limit=100', $uri->getQuery());
+        $this->assertStringContainsString('cursor=cursor_abc', $uri->getQuery());
+        $this->assertStringContainsString('sort=-id', $uri->getQuery());
         $this->assertStringContainsString(
             rawurlencode('[{"field":"bank_account_id","operator":"eq","value":"42"}]'),
-            (string) $request->getUri()
+            $uri->getQuery()
         );
     }
 
     public function testUpdateSendsRawPayloadToTransactionEndpoint(): void
     {
-        [$api, $history] = $this->makeApi([
+        $api = $this->makeApi([
             new Response(200, [], json_encode(['id' => 42])),
         ]);
 
@@ -47,16 +53,16 @@ class TransactionsTest extends TestCase
 
         $api->update(42, $payload);
 
-        $request = $history[0]['request'];
+        $request = $this->history[0]['request'];
 
         $this->assertSame('PUT', $request->getMethod());
-        $this->assertSame('/v2/transactions/42', (string) $request->getUri());
+        $this->assertSame('/v2/transactions/42', $request->getUri()->getPath());
         $this->assertSame(json_encode($payload), (string) $request->getBody());
     }
 
     public function testSetCategoriesUsesTransactionCategoriesEndpoint(): void
     {
-        [$api, $history] = $this->makeApi([
+        $api = $this->makeApi([
             new Response(200, [], json_encode(['items' => []])),
         ]);
 
@@ -67,16 +73,16 @@ class TransactionsTest extends TestCase
 
         $api->setCategories(42, $payload);
 
-        $request = $history[0]['request'];
+        $request = $this->history[0]['request'];
 
         $this->assertSame('PUT', $request->getMethod());
-        $this->assertSame('/v2/transactions/42/categories', (string) $request->getUri());
+        $this->assertSame('/v2/transactions/42/categories', $request->getUri()->getPath());
         $this->assertSame(json_encode($payload), (string) $request->getBody());
     }
 
     public function testMatchedInvoicesAndCategoriesSupportCursorPagination(): void
     {
-        [$api, $history] = $this->makeApi([
+        $api = $this->makeApi([
             new Response(200, [], json_encode(['items' => [], 'has_more' => false, 'next_cursor' => null])),
             new Response(200, [], json_encode(['items' => [], 'has_more' => false, 'next_cursor' => null])),
         ]);
@@ -84,13 +90,15 @@ class TransactionsTest extends TestCase
         $api->matchedInvoices(42, ['limit' => 10, 'cursor' => 'next_invoices']);
         $api->categories(42, ['limit' => 15, 'cursor' => 'next_categories']);
 
-        $this->assertSame('/v2/transactions/42/matched_invoices?cursor=next_invoices&limit=10', (string) $history[0]['request']->getUri());
-        $this->assertSame('/v2/transactions/42/categories?cursor=next_categories&limit=15', (string) $history[1]['request']->getUri());
+        $this->assertSame('/v2/transactions/42/matched_invoices', $this->history[0]['request']->getUri()->getPath());
+        $this->assertSame('cursor=next_invoices&limit=10', $this->history[0]['request']->getUri()->getQuery());
+        $this->assertSame('/v2/transactions/42/categories', $this->history[1]['request']->getUri()->getPath());
+        $this->assertSame('cursor=next_categories&limit=15', $this->history[1]['request']->getUri()->getQuery());
     }
 
     public function testThrowsWhenUsingV1Namespace(): void
     {
-        [$api] = $this->makeApi([], BaseApi::API_NAMESPACE_V1);
+        $api = $this->makeApi([], BaseApi::API_NAMESPACE_V1);
 
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Transaction endpoints are only available with the V2 API.');
@@ -101,20 +109,20 @@ class TransactionsTest extends TestCase
     /**
      * @param array $responses
      * @param string $namespace
-     * @return array{0: Transactions, 1: array}
+     * @return Transactions
      */
-    private function makeApi(array $responses, string $namespace = BaseApi::API_NAMESPACE_V2): array
+    private function makeApi(array $responses, string $namespace = BaseApi::API_NAMESPACE_V2): Transactions
     {
-        $history = [];
+        $this->history = [];
         $mock = new MockHandler($responses);
         $handlerStack = HandlerStack::create($mock);
-        $handlerStack->push(Middleware::history($history));
+        $handlerStack->push(Middleware::history($this->history));
 
         $client = new Client([
             'base_uri' => 'https://example.test/',
             'handler' => $handlerStack,
         ]);
 
-        return [new Transactions($client, $namespace), $history];
+        return new Transactions($client, $namespace);
     }
 }

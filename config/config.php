@@ -29,4 +29,11 @@ return [
         'suppliers' => env('PENNYLANE_USE_2026_API_CHANGES_SUPPLIERS'),
         'transactions' => env('PENNYLANE_USE_2026_API_CHANGES_TRANSACTIONS'),
     ],
+    'rate_limit' => [
+        'enabled' => env('PENNYLANE_API_V2_RATE_LIMIT_ENABLED', true),
+        'max_retries' => env('PENNYLANE_API_V2_RATE_LIMIT_MAX_RETRIES', 2),
+        'jitter_ms' => env('PENNYLANE_API_V2_RATE_LIMIT_JITTER_MS', 250),
+        'max_delay_ms' => env('PENNYLANE_API_V2_RATE_LIMIT_MAX_DELAY_MS', 5000),
+        'fallback_delay_ms' => env('PENNYLANE_API_V2_RATE_LIMIT_FALLBACK_DELAY_MS', 1000),
+    ],
 ];

@@ -26,11 +26,11 @@ class ApiTelemetryMiddleware
             $requestId = $this->generateRequestId();
 
             return $handler($request, $options)->then(
-                function (ResponseInterface $response) use ($request, $startedAt, $requestId) {
-                    $this->dispatchTelemetry($request, $response, null, $startedAt, $requestId);
+                function (ResponseInterface $response) use ($request, $options, $startedAt, $requestId) {
+                    $this->dispatchTelemetry($request, $response, null, $startedAt, $requestId, $options);
                     return $response;
                 },
-                function ($reason) use ($request, $startedAt, $requestId) {
+                function ($reason) use ($request, $options, $startedAt, $requestId) {
                     $response = null;
                     $errorType = null;
 
@@ -46,7 +46,7 @@ class ApiTelemetryMiddleware
                         $errorType = gettype($reason);
                     }
 
-                    $this->dispatchTelemetry($request, $response, $errorType, $startedAt, $requestId);
+                    $this->dispatchTelemetry($request, $response, $errorType, $startedAt, $requestId, $options);
 
                     throw $reason;
                 }
@@ -59,7 +59,8 @@ class ApiTelemetryMiddleware
         ?ResponseInterface $response,
         ?string $errorType,
         float $startedAt,
-        string $requestId
+        string $requestId,
+        array $options = []
     ): void {
         if (!function_exists('event')) {
             return;
@@ -67,6 +68,7 @@ class ApiTelemetryMiddleware
 
         $finishedAt = microtime(true);
         $durationMs = (int) round(($finishedAt - $startedAt) * 1000);
+        $retryAttempt = max(0, (int) ($options['pennylane_rate_limit_retries'] ?? 0));
 
         $payload = ApiCallTelemetryPayload::make([
             'request_id' => $requestId,
@@ -83,6 +85,8 @@ class ApiTelemetryMiddleware
             'ratelimit_remaining' => $this->parseIntHeader($response, 'ratelimit-remaining'),
             'ratelimit_reset' => $this->parseIntHeader($response, 'ratelimit-reset'),
             'retry_after' => $this->parseIntHeader($response, 'retry-after'),
+            'retry_attempt' => $retryAttempt,
+            'was_retried' => $retryAttempt > 0,
             'error_type' => $errorType,
         ]);
 
