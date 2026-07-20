@@ -12,8 +12,20 @@ class LedgerEntryLines extends BaseApi
         'ledger_account_id',
     ];
 
+    private array $listAllFilterFields = [
+        'id',
+        'journal_id',
+        'ledger_account_id',
+        'date',
+    ];
+
     private $sort_fields = [
         'id',
+    ];
+
+    private array $listAllSortFields = [
+        'id',
+        'date',
     ];
 
     /**
@@ -58,6 +70,47 @@ class LedgerEntryLines extends BaseApi
 
         $queryString = http_build_query($query);
         return $this->requestJson('get', $this->getNamespace() . "ledger_entries/$ledger_entry_id/ledger_entry_lines" . ($queryString ? ('?' . $queryString) : ''));
+    }
+
+    /**
+     * List ledger entry lines without scoping the request to a ledger entry.
+     *
+     * @param int $page Ignored for this V2-only endpoint, kept for signature consistency.
+     * @param int $per_page Number of items requested through the `limit` query parameter.
+     * @param array $filters Optional filters.
+     * @param string|null $sort Optional sort field.
+     * @param string|null $cursor Optional cursor for V2 pagination.
+     * @return array
+     * @throws \RuntimeException When the API namespace is not V2.
+     * @author Jonathan F. <jonathan.f@mistersmoke.com>
+     */
+    public function listAll($page = 1, $per_page = 20, array $filters = [], ?string $sort = null, ?string $cursor = null): array
+    {
+        if (!$this->isV2()) {
+            throw new \RuntimeException('Ledger entry line listing is only available with the V2 API.');
+        }
+
+        $query = [
+            'limit' => $per_page,
+        ];
+
+        if ($cursor !== null) {
+            $query['cursor'] = $cursor;
+        }
+
+        $filter = $this->normalizeFilters($filters, $this->listAllFilterFields);
+        if ($filter !== '') {
+            $query['filter'] = $filter;
+        }
+
+        $sort = $this->normalizeSort($sort, $this->listAllSortFields);
+        if ($sort !== '') {
+            $query['sort'] = $sort;
+        }
+
+        $queryString = http_build_query($query);
+
+        return $this->requestJson('get', $this->getNamespace() . 'ledger_entry_lines' . ($queryString ? ('?' . $queryString) : ''));
     }
 
     /**
@@ -168,5 +221,56 @@ class LedgerEntryLines extends BaseApi
 
         $endpoint = sprintf('%sledger_entry_lines/%s', $this->getNamespace(), $ledger_entry_line_id);
         return $this->requestJson('get', $endpoint);
+    }
+
+    /**
+     * Normalize filters against an endpoint-specific allow-list.
+     *
+     * @param array $filters
+     * @param array $allowedFields
+     * @return string
+     * @author Jonathan F. <jonathan.f@mistersmoke.com>
+     */
+    private function normalizeFilters(array $filters, array $allowedFields): string
+    {
+        $normalized = [];
+
+        foreach ($filters as $filter) {
+            if (!is_array($filter)) {
+                continue;
+            }
+
+            $field = $filter['field'] ?? null;
+            if (!is_string($field) || !in_array($field, $allowedFields, true)) {
+                continue;
+            }
+
+            $normalized[] = [
+                'field' => $field,
+                'operator' => $filter['operator'] ?? null,
+                'value' => $filter['value'] ?? null,
+            ];
+        }
+
+        return !empty($normalized) ? json_encode($normalized) : '';
+    }
+
+    /**
+     * Normalize sort values against an endpoint-specific allow-list.
+     *
+     * @param string|null $sort
+     * @param array $allowedFields
+     * @return string
+     * @author Jonathan F. <jonathan.f@mistersmoke.com>
+     */
+    private function normalizeSort(?string $sort, array $allowedFields): string
+    {
+        if ($sort === null || $sort === '') {
+            return '';
+        }
+
+        $sortField = ltrim($sort, '-');
+
+        return in_array($sortField, $allowedFields, true) ? $sort : '';
     }
 }
